@@ -1,14 +1,14 @@
 import unittest
 import numpy as np
 from pathlib import Path
-from calipy.Camera import Camera
+from calibpy.Camera import Camera
 
 
 class TestCameraModule(unittest.TestCase):
 
     def setUp(self):
         print("start Camera tests...")
-        self._root = Path.cwd()
+        self._root = Path.cwd() / "tests" / "data"
 
     def test_consistency(self):
         print("test_consistency...")
@@ -38,7 +38,7 @@ class TestCameraModule(unittest.TestCase):
 
     def test_serializing(self):
         print("test_serializing...")
-        dump_fname = str(self._root / "tests" / "data" / "test.npy")
+        dump_fname = str(self._root / "test.npy")
         cam = Camera()
         cam.quick_init()
         cam.serialize(dump_fname)
@@ -50,6 +50,9 @@ class TestCameraModule(unittest.TestCase):
         self.assertEqual(cam.f_mm, cam2.f_mm)
         self.assertEqual(cam.sensor_size, cam2.sensor_size)
         self.assertEqual(cam.image_size, cam2.image_size)
+
+        import os
+        os.remove(dump_fname)
 
 
 if __name__ == '__main__':

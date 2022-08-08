@@ -9,9 +9,12 @@ except (ModuleNotFoundError, ImportError):
 
 class Camera(Serializer):
     """
-    Camera class modelling all aspects of a pinhole camera.
-    It derives from a Serializer class to ensure all protected 
-    class members can be serialized and deserialized.
+    Camera class models a pinhole camera and keeps track of all
+    relevant data like intrinsics and transformations.
+    It inherits from class Serializer, which allows to serialize
+    and deserialize all protected class members.
+
+    :inherit Serializer: Serializer base class enables serialization
     """
 
     def __init__(self):
@@ -28,12 +31,16 @@ class Camera(Serializer):
                    f_mm: float = 50,
                    sensor_size: tuple = (20.25, 36.0),
                    image_size: tuple = (1080, 1920)):
-        """Automatically initializes the camera instance as Blender default camera
+        """
+        Automatically initializes the camera
+        instance as Blender default camera
 
-        Args:
-            f_mm (float, optional): Focal length in mm. Defaults to 50.
-            sensor_size (tuple, optional): Sensor size in mm (sy, sx). Defaults to (20.25, 36.0).
-            image_size (tuple, optional): Image size in px (y, x). Defaults to (1080, 1920).
+        :param f_mm: Focal length in mm, defaults to 50
+        :type f_mm: float, optional
+        :param sensor_size: Sensor size in mm (y, x), defaults to (20.25, 36.0)
+        :type sensor_size: tuple, optional
+        :param image_size: Image size in px (y, x), defaults to (1080, 1920)
+        :type image_size: tuple, optional
         """
         self._f_mm = f_mm
         self._sensor_size = sensor_size
@@ -50,15 +57,18 @@ class Camera(Serializer):
                            f_mm: float = None,
                            sensor_size: tuple = None,
                            image_size: tuple = None):
-        """Computing intrinsic camera matrix. To successfully compute the
+        """
+        Computing intrinsic camera matrix. To successfully compute the
         matrix f_mm, sensor_size and image_size are needed, thus each must
         be passed as argument when calling this function or must have been
         set in advance.
 
-        Args:
-            f_mm (float, optional): focal length in mm. Defaults to None.
-            sensor_size (tuple, optional): Sensor size in mm (sy, sx). Defaults to None.
-            image_size (tuple, optional): Image size in px (y, x). Defaults to None.
+        :param f_mm: focal length in mm, defaults to None
+        :type f_mm: float, optional
+        :param sensor_size: Sensor size in mm (y, x), defaults to None
+        :type sensor_size: tuple, optional
+        :param image_size: Image size in px (y, x), defaults to None
+        :type image_size: tuple, optional
         """
         if f_mm is not None:
             self._f_mm = f_mm
@@ -122,15 +132,20 @@ class Camera(Serializer):
                        cx: float,
                        cy: float,
                        s: float = 0):
-        """set intrinsics, fx/fy focal length in px, cx/cy optical center in
-        px, s skew factor
+        """
+        set intrinsics, fx/fy focal length in px, cx/cy
+        optical center in px, s skew factor
 
-        Args:
-            fx (float): focal length in px
-            fy (float): focal length in px
-            cx (float): optical center in px
-            cy (float): optical center in px
-            s (float, optional): skew factor. Defaults to 0.
+        :param fx: focal length in px
+        :type fx: float
+        :param fy: focal length in px
+        :type fy: float
+        :param cx: optical center in px
+        :type cx: float
+        :param cy: optical center in px
+        :type cy: float
+        :param s: skew factor, defaults to 0
+        :type s: float, optional
         """
         self.intrinsics = np.array([[fx, s, cx], [0, fy, cy], [0, 0, 1]])
 
@@ -150,16 +165,21 @@ class Camera(Serializer):
                        p1: float,
                        p2: float,
                        k3: float):
-        """Set distortion coefficients. The coefficients are the
+        """
+        Set distortion coefficients. The coefficients are the
         opencv 5 parameter model:
         https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html
 
-        Args:
-            k1 (float):
-            k2 (float):
-            p1 (float):
-            p2 (float):
-            k3 (float):
+        :param k1:
+        :type k1: float
+        :param k2:
+        :type k2: float
+        :param p1:
+        :type p1: float
+        :param p2:
+        :type p2: float
+        :param k3:
+        :type k3: float
         """
         self.distortion(np.array([[k1, k2, p1, p2, k3]]))
 
@@ -182,11 +202,3 @@ class Camera(Serializer):
     @property
     def RTb(self):
         return self._RTb
-
-
-if __name__ == "__main__":
-    cam = Camera()
-    cam.quick_init()
-    cam.serialize("C:\\Users\\svenw\\OneDrive\\Desktop\\test.npy")
-    cam2 = Camera()
-    cam2.load("C:\\Users\\svenw\\OneDrive\\Desktop\\test.npy")

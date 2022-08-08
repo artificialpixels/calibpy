@@ -1,15 +1,17 @@
+#!/usr/bin/env python3
+
 import pickle
 import tempfile
 from pathlib import Path
 
 
 class Serializer:
-    """Base class for objects that needs to be serializable. When
+    """
+    Base class for objects that needs to be serializable. When
     deriving from this class, the child class inherits the functions
-    serialize and load, which allow to serialize all protected 
+    serialize and load, which allow to serialize all protected
     class attributes as dictionary and as .npy file. The latter
     can be used to instantiate the class from file.
-
     """
 
     def __init__(self):
@@ -27,11 +29,10 @@ class Serializer:
         returns a dictionary. When passing a filename argument, the
         serialized object is dumped to a .npy file.
 
-        Args:
-            filename (str, optional): dump filename. Defaults to None.
-
-        Returns:
-            dict: serialized dict keeping all protected class attributes
+        :param filename: dump filename., defaults to None
+        :type filename: str, optional
+        :return: serialized dict keeping all protected class attributes
+        :rtype: dict
         """
         data = {}
         for key in self.__dict__.keys():
@@ -55,8 +56,8 @@ class Serializer:
         """Loads a .npy file and creates a class attribute
         for each entry in the dictionary loaded.
 
-        Args:
-            filename (str): dump file filename
+        :param filename: dump file filename
+        :type filename: str
         """
         assert Path(filename).is_file()
         assert Path(filename).suffix == ".npy"
