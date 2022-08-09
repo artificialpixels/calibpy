@@ -1,10 +1,12 @@
+from pathlib import Path
+
 from calibpy.Camera import Camera
+from calibpy.Stream import Stream
 
 
 if __name__ == "__main__":
+    stream = Stream(Path.cwd() / "tests" / "data" /
+                    "single_cam" / "undistorted")
     cam = Camera()
-    cam.quick_init()
-    cam.serialize("C:\\Users\\svenw\\OneDrive\\Desktop\\test.npy")
-    cam2 = Camera()
-    cam2.load("C:\\Users\\svenw\\OneDrive\\Desktop\\test.npy")
-    a = 0
+    cam.stream = stream
+    print("Camera has Stream: ", cam.has_stream(), "of length:", stream.length)

@@ -3,8 +3,10 @@
 import numpy as np
 try:
     from Serializer import Serializer
+    from Stream import Stream
 except (ModuleNotFoundError, ImportError):
     from .Serializer import Serializer
+    from .Stream import Stream
 
 
 class Camera(Serializer):
@@ -25,6 +27,7 @@ class Camera(Serializer):
         self._distortion = None     # (k1, k2, p1, p2, k3)
         self._RT = None             # 4x4 transformation matrix
         self._RTb = None            # 4x4 Blender matrix_world
+        self._stream = None         # Stream instance keeping images
         print("Camera initialized!")
 
     def quick_init(self,
@@ -86,6 +89,28 @@ class Camera(Serializer):
         s_x = self._image_size[1] / 2
         s_y = self._image_size[0] / 2
         self._intrinsics = np.array([[f_x, 0, s_x], [0, f_y, s_y], [0, 0, 1]])
+
+    @property
+    def stream(self):
+        return self._stream
+
+    @stream.setter
+    def stream(self, value: Stream):
+        """Set a stream instance
+
+        :param stream: Stream instance
+        :type stream: Stream
+        """
+        assert isinstance(value, Stream)
+        self._stream = value
+
+    def has_stream(self) -> bool:
+        """Check if camera has a stream instance
+
+        :return: True if camera has a stream object, False otherwise
+        :rtype: bool
+        """
+        return self._stream is not None
 
     @property
     def f_mm(self):

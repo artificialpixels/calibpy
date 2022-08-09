@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 from pathlib import Path
 from calibpy.Camera import Camera
+from calibpy.Stream import Stream
 
 
 class TestCameraModule(unittest.TestCase):
@@ -9,6 +10,14 @@ class TestCameraModule(unittest.TestCase):
     def setUp(self):
         print("start Camera tests...")
         self._root = Path.cwd() / "tests" / "data"
+
+    def test_helpers(self):
+        stream = Stream()
+        cam = Camera()
+        cam.quick_init()
+        self.assertFalse(cam.has_stream())
+        cam.stream = stream
+        self.assertTrue(cam.has_stream())
 
     def test_consistency(self):
         print("test_consistency...")

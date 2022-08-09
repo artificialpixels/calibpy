@@ -20,16 +20,31 @@ class Stream:
     next, the next image is physically loaded and returned.
     """
 
-    def __init__(self):
+    def __init__(self,
+                 dir: str = None,
+                 prefix: str = None,
+                 suffix: str = None):
+        """
+        :param dir: directory with image files, defaults to None
+        :type dir: str, optional
+        :param prefix: filename prefix [pre_]000x..., defaults to None
+        :type prefix: str, optional
+        :param suffix: filename suffix ...000x_[suf], defaults to None
+        :type suffix: str, optional
+        """
         self._dir = None
         self._filenames = []
         self._current_frame = -1
+
+        if dir is not None:
+            self.load(dir=dir, prefix=prefix, suffix=suffix)
 
     def __str__(self):
         return f"Stream:\n{self._dir}\nframes: {self.length}"
 
     @staticmethod
-    def load_image(filename: str, flag: int = cv2.IMREAD_GRAYSCALE) -> np.ndarray:
+    def load_image(filename: str,
+                   flag: int = cv2.IMREAD_GRAYSCALE) -> np.ndarray:
         """Loading a single image using opencv flags 
         https://docs.opencv.org/3.4/d8/d6a/group__imgcodecs__flags.html)
 
@@ -143,7 +158,7 @@ class Stream:
         :type suffix: str, optional
         """
         assert Path(dir).is_dir()
-        self._dir = dir
+        self._dir = str(dir)
 
         from glob import glob
         for fname in glob(self._dir + os.sep + "*"):
