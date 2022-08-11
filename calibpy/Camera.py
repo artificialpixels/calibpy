@@ -20,6 +20,7 @@ class Camera(Serializer):
     """
 
     def __init__(self):
+        self._name = None
         self._f_mm = None           # f in mm
         self._sensor_size = None    # size in mm, (y, x)
         self._image_size = None     # size in px, (y, x)
@@ -27,8 +28,12 @@ class Camera(Serializer):
         self._distortion = None     # (k1, k2, p1, p2, k3)
         self._RT = None             # 4x4 transformation matrix
         self._RTb = None            # 4x4 Blender matrix_world
-        self._stream = None         # Stream instance keeping images
         print("Camera initialized!")
+
+    @classmethod
+    def from_cam(cls, other):
+        from copy import deepcopy
+        return deepcopy(other)
 
     def quick_init(self,
                    f_mm: float = 50,
@@ -91,26 +96,31 @@ class Camera(Serializer):
         self._intrinsics = np.array([[f_x, 0, s_x], [0, f_y, s_y], [0, 0, 1]])
 
     @property
-    def stream(self):
-        return self._stream
+    def name(self):
+        return self._name
 
-    @stream.setter
-    def stream(self, value: Stream):
-        """Set a stream instance
+    @name.setter
+    def name(self, value: str):
+        assert isinstance(value, str)
+        self._name = value
 
-        :param stream: Stream instance
-        :type stream: Stream
-        """
-        assert isinstance(value, Stream)
-        self._stream = value
+    @property
+    def f_px(self):
+        if self.intrinsics is not None:
+            return (self.intrinsics[0, 0] + self.intrinsics[1, 1]) / 2
+        return None
 
-    def has_stream(self) -> bool:
-        """Check if camera has a stream instance
+    @property
+    def cx(self):
+        if self.intrinsics is not None:
+            return self.intrinsics[0, 2]
+        return None
 
-        :return: True if camera has a stream object, False otherwise
-        :rtype: bool
-        """
-        return self._stream is not None
+    @property
+    def cy(self):
+        if self.intrinsics is not None:
+            return self.intrinsics[1, 2]
+        return None
 
     @property
     def f_mm(self):
@@ -126,7 +136,7 @@ class Camera(Serializer):
         return self._sensor_size
 
     @sensor_size_mm.setter
-    def sensor_size(self, value: tuple):
+    def sensor_size_mm(self, value: tuple):
         assert isinstance(value, tuple)
         assert len(value) == 2
         self._sensor_size = value
@@ -218,12 +228,35 @@ class Camera(Serializer):
         self._RT = value
 
         # from opencv to blender convention
-        T = np.array([[1, 0, 0, 0],
+        T1 = np.array([[1, 0, 0, 0],
                       [0, -1, 0, 0],
                       [0, 0, -1, 0],
                       [0, 0, 0, 1]])
-        self._RTb = np.linalg.inv(self._RT) @ T
+        self._RTb = self._RT @ T1
+        self._RTb = np.linalg.inv(self._RTb)
+        self._RTb = self._RTb @ T1
+
+        # T2 = np.array([[1, 1, 1, 1],
+        #               [1, 1, 1, -1],
+        #               [1, 1, 1, -1],
+        #               [1, 1, 1, 1]])
+        # self._RTb = np.multiply(self._RTb, T2)
+
+    def get_blender_mw_str(self):
+        M = self._RTb
+        return f"Matrix((({M[0,0]},{M[0,1]},{M[0,2]},{M[0,3]}),({M[1,0]},{M[1,1]},{M[1,2]},{M[1,3]}),({M[2,0]},{M[2,1]},{M[2,2]},{M[2,3]}),({M[3,0]},{M[3,1]},{M[3,2]},{M[3,3]})))"
 
     @property
     def RTb(self):
         return self._RTb
+
+    def set_rotation_and_translation(self, rot_3x3, trans_3):
+        Rt = np.zeros((4, 4), dtype=np.float32)
+        Rt[0:3, 0:3] = rot_3x3
+        Rt[0:3, 3] = trans_3.ravel()
+        self.RT = Rt
+
+    def compute_f_mm(self):
+        if self.image_size is None or self.sensor_size_mm is None:
+            return
+        self.f_mm = self.f_px / self.image_size[1] * self.sensor_size_mm[1]

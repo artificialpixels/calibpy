@@ -34,12 +34,17 @@ class Serializer:
         :return: serialized dict keeping all protected class attributes
         :rtype: dict
         """
+        if filename is not None:
+            if isinstance(filename, Path):
+                filename = str(filename)
+            assert isinstance(filename, str)
+
         data = {}
         for key in self.__dict__.keys():
             if not key.startswith('__') and not callable(key):
                 if key.startswith('_'):
                     print(key, type(key))
-                    data[key] = self.__dict__[key]
+                    data[key[1:]] = self.__dict__[key]
         if filename is None:
             self.root = tempfile.gettempdir()
             name = self.__class__.__name__
@@ -64,4 +69,4 @@ class Serializer:
         with open(filename, "rb") as f:
             data = pickle.load(f)
         for key, value in data.items():
-            setattr(self, key, value)
+            setattr(self, "_"+key, value)

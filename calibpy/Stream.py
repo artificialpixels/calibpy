@@ -198,5 +198,7 @@ class Stream:
         :rtype: np.ndarray
         """
         self._current_frame += 1
+        if self._current_frame >= self.length:
+            return None
         fname = self._filenames[self._current_frame]
         return Stream.load_image(fname, flag)
