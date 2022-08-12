@@ -22,6 +22,13 @@ class TestCameraModule(unittest.TestCase):
         for fname in fnames:
             with open(fname, "r") as file:
                 self._cam_gts.append(yaml.safe_load(file))
+        self._test_data_filenames = []
+
+    def tearDown(self):
+        import os
+        for fname in self._test_data_filenames:
+            if Path(fname).exists():
+                os.remove(fname)
 
     def test_intrisics(self):
         stream = Stream(self._root / "single_cam" / "undistorted")
@@ -76,17 +83,21 @@ class TestCameraModule(unittest.TestCase):
             "sensor_height_mm": 7.5,
             "f_mm": 16.0,
             "visualize": False,
-            "outdir": "C:\\Users\\svenw\\OneDrive\\Desktop\\results"
+            "outdir": self._root
         })
 
         calib = Calibration(settings=settings)
         cam = calib.calibrate_intrinsics(stream)
         cam.serialize(Path(settings.outdir) / "intrinsics.npy")
+        self._test_data_filenames.append(
+            str(Path(settings.outdir) / "intrinsics.npy"))
 
         stream = Stream(self._root / "single_cam" / "undistorted")
         cams = calib.calibrate_extrinsics(stream, cam)
         for cam in cams:
             cam.serialize(Path(settings.outdir) / f"{cam.name}.npy")
+            self._test_data_filenames.append(
+                str(Path(settings.outdir) / f"{cam.name}.npy"))
         self.assertEqual(len(self._cam_gts), len(cams))
         for n, cam in enumerate(cams):
             gt = self._cam_gts[n]
