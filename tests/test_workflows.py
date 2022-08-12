@@ -1,4 +1,7 @@
+
+import yaml
 import unittest
+from glob import glob
 from pathlib import Path
 from calibpy.Stream import Stream
 from calibpy.Settings import Settings
@@ -12,9 +15,6 @@ class TestCameraModule(unittest.TestCase):
         self._root = Path.cwd() / "tests" / "data"
         self._cam_gts = []
         gt_path = self._root / "single_cam" / "cams"
-        import os
-        import yaml
-        from glob import glob
         fnames = []
         for fname in glob(str(gt_path / "*.yaml")):
             fnames.append(fname)
@@ -94,12 +94,12 @@ class TestCameraModule(unittest.TestCase):
             # test translation
             for i in range(3):
                 test = abs(gt["translation"][i][0] - mw[i, 3])
-                self.assertTrue(test < 0.005)
+                self.assertTrue(test < 0.002)
             # test rotation
             for i in range(3):
                 for j in range(3):
                     test = abs(gt["rotationMat"][i][j] - mw[i, j])
-                    self.assertTrue(test < 0.005)
+                    self.assertTrue(test < 0.001)
 
 
 if __name__ == '__main__':

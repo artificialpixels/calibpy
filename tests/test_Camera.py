@@ -11,14 +11,6 @@ class TestCameraModule(unittest.TestCase):
         print("start Camera tests...")
         self._root = Path.cwd() / "tests" / "data"
 
-    def test_helpers(self):
-        stream = Stream()
-        cam = Camera()
-        cam.quick_init()
-        self.assertFalse(cam.has_stream())
-        cam.stream = stream
-        self.assertTrue(cam.has_stream())
-
     def test_consistency(self):
         print("test_consistency...")
         cam = Camera()
@@ -40,8 +32,8 @@ class TestCameraModule(unittest.TestCase):
         np.testing.assert_almost_equal(ref, cam.RT)
 
         ref = np.array([[1, 0, 0, 0],
-                        [0, -1, 0, 0],
-                        [0, 0, -1, 0],
+                        [0, 1, 0, 0],
+                        [0, 0, 1, 0],
                         [0, 0, 0, 1]])
         np.testing.assert_almost_equal(ref, cam.RTb)
 
@@ -57,7 +49,7 @@ class TestCameraModule(unittest.TestCase):
         np.testing.assert_array_almost_equal(cam.RT, cam2.RT)
         np.testing.assert_array_almost_equal(cam.RTb, cam2.RTb)
         self.assertEqual(cam.f_mm, cam2.f_mm)
-        self.assertEqual(cam.sensor_size, cam2.sensor_size)
+        self.assertEqual(cam.sensor_size_mm, cam2.sensor_size_mm)
         self.assertEqual(cam.image_size, cam2.image_size)
 
         import os

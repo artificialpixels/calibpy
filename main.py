@@ -4,8 +4,13 @@ from calibpy.Stream import Stream
 from calibpy.Settings import Settings
 from calibpy.Calibration import Calibration
 
+from calibpy.Camera import Camera
 
 if __name__ == "__main__":
+
+    cam = Camera()
+    cam.quick_init()
+
     stream = Stream(Path.cwd() / "tests" / "data" /
                     "single_cam" / "undistorted")
     print("Number of frames:", stream.length)

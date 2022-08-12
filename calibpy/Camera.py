@@ -30,10 +30,17 @@ class Camera(Serializer):
         self._RTb = None            # 4x4 Blender matrix_world
         print("Camera initialized!")
 
-    @classmethod
-    def from_cam(cls, other):
+    @staticmethod
+    def from_cam(cam):
+        """Copy Camera object
+
+        :param cam: Camera instance
+        :type cam: Camera
+        :return: Camera instance copy
+        :rtype: Camera
+        """
         from copy import deepcopy
-        return deepcopy(other)
+        return deepcopy(cam)
 
     def quick_init(self,
                    f_mm: float = 50,
@@ -236,27 +243,30 @@ class Camera(Serializer):
         self._RTb = np.linalg.inv(self._RTb)
         self._RTb = self._RTb @ T1
 
-        # T2 = np.array([[1, 1, 1, 1],
-        #               [1, 1, 1, -1],
-        #               [1, 1, 1, -1],
-        #               [1, 1, 1, 1]])
-        # self._RTb = np.multiply(self._RTb, T2)
-
-    def get_blender_mw_str(self):
-        M = self._RTb
-        return f"Matrix((({M[0,0]},{M[0,1]},{M[0,2]},{M[0,3]}),({M[1,0]},{M[1,1]},{M[1,2]},{M[1,3]}),({M[2,0]},{M[2,1]},{M[2,2]},{M[2,3]}),({M[3,0]},{M[3,1]},{M[3,2]},{M[3,3]})))"
-
     @property
     def RTb(self):
         return self._RTb
 
-    def set_rotation_and_translation(self, rot_3x3, trans_3):
+    def set_rotation_and_translation(
+            self,
+            rot_3x3: np.ndarray,
+            translation: np.ndarray):
+        """Set 4x4 transformation matrix from rotation
+        matrix and translation vector
+
+        :param rot_3x3: 3x3 Rotation matrix
+        :type rot_3x3: np.ndarray
+        :param translation: translation vector
+        :type translation: np.ndarray
+        """
         Rt = np.zeros((4, 4), dtype=np.float32)
         Rt[0:3, 0:3] = rot_3x3
-        Rt[0:3, 3] = trans_3.ravel()
+        Rt[0:3, 3] = translation.ravel()
         self.RT = Rt
 
     def compute_f_mm(self):
+        """ Compute focal length in mm if image size and sensor size are available
+        """
         if self.image_size is None or self.sensor_size_mm is None:
             return
         self.f_mm = self.f_px / self.image_size[1] * self.sensor_size_mm[1]

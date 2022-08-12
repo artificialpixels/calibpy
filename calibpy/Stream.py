@@ -115,8 +115,9 @@ class Stream:
         return None
 
     def _sort_filenames(self):
-        """Do numeric sorting of the _filename list, precondition is that 
-        filenames follow the pattern [prefix_]000x[_suffix]
+        """Do numeric sorting of the _filename list,
+        precondition is that filenames follow the
+        pattern [prefix_]000x[_suffix]
         """
         def filename_splitter(filename):
             name = Path(filename).name
@@ -152,9 +153,9 @@ class Stream:
 
         :param dir: directory with image files
         :type dir: str
-        :param prefix: filename prefix [pre_]000x..., defaults to None
+        :param prefix: filename prefix prefix_000x..., defaults to None
         :type prefix: str, optional
-        :param suffix: filename suffix ...000x_[suf], defaults to None
+        :param suffix: filename suffix ...000x_suffix, defaults to None
         :type suffix: str, optional
         """
         assert Path(dir).is_dir()

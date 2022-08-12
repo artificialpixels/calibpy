@@ -25,6 +25,22 @@ Calibpy Camera
 .. automodule:: calibpy.Camera
    :members:
 
+Calibpy Settings
+=====================
+.. automodule:: calibpy.Settings
+   :members:
+
+Calibpy Calibration
+=====================
+.. automodule:: calibpy.Calibration
+   :members:
+
+Calibpy Aruco
+=====================
+.. automodule:: calibpy.Aruco
+   :members:
+
+
 Indices and tables
 ==================
 
