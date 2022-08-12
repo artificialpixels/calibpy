@@ -1,11 +1,12 @@
-
 import yaml
 import unittest
+import numpy as np
 from glob import glob
 from pathlib import Path
 from calibpy.Stream import Stream
 from calibpy.Settings import Settings
 from calibpy.Calibration import Calibration
+from calibpy.Registration import register_depthmap_to_world
 
 
 class TestCameraModule(unittest.TestCase):
@@ -111,6 +112,53 @@ class TestCameraModule(unittest.TestCase):
                 for j in range(3):
                     test = abs(gt["rotationMat"][i][j] - mw[i, j])
                     self.assertTrue(test < 0.001)
+
+    def test_registration(self):
+        settings = Settings()
+        settings.from_params({
+            "aruco_dict": "DICT_5X5",
+            "cols": 24,
+            "rows": 18,
+            "square_size": 0.080,
+            "marker_size": 0.062,
+            "min_number_of_corners": 20,
+            "min_number_of_calibration_images": 20,
+            "max_count": 10000,
+            "epsilon": 0.00001,
+            "sensor_width_mm": 10,
+            "sensor_height_mm": 7.5,
+            "f_mm": 16.0,
+            "visualize": False
+        })
+
+        calib = Calibration(settings=settings)
+        stream = Stream(self._root / "single_cam" / "undistorted")
+        cam = calib.calibrate_intrinsics(stream)
+        stream = Stream(self._root / "single_cam" / "undistorted")
+        cams = calib.calibrate_extrinsics(stream, cam)
+        depth_stream = Stream(self._root / "single_cam" / "depth")
+
+        stream.reset()
+        pcds = []
+        means = np.zeros((4, 3), dtype=np.float32)
+        for i in range(4):
+            pcd = register_depthmap_to_world(
+                cams[i],
+                depth_stream.get(i),
+                stream.get(i),
+                0.1)
+            mean, _ = pcd.compute_mean_and_covariance()
+            means[i, :] = mean
+            pcds.append(pcd)
+
+        std_x = np.std(means[:, 0])
+        std_y = np.std(means[:, 1])
+        std_z = np.std(means[:, 2])
+        mean_z = np.mean(means[:, 2])
+        self.assertTrue(std_x < 0.1)
+        self.assertTrue(std_y < 0.1)
+        self.assertTrue(std_z < 0.001)
+        self.assertTrue(abs(mean_z-0.072) < 0.001)
 
 
 if __name__ == '__main__':

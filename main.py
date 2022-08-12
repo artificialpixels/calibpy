@@ -1,19 +1,16 @@
+import open3d as o3d
+import numpy as np
 from pathlib import Path
 
 from calibpy.Stream import Stream
 from calibpy.Settings import Settings
 from calibpy.Calibration import Calibration
 
-from calibpy.Camera import Camera
+from calibpy.Registration import load_as_rgbd, register_depthmap_to_world, show_registration
+
 
 if __name__ == "__main__":
-
-    cam = Camera()
-    cam.quick_init()
-
-    stream = Stream(Path.cwd() / "tests" / "data" /
-                    "single_cam" / "undistorted")
-    print("Number of frames:", stream.length)
+    root = Path.cwd() / "tests" / "data"
 
     settings = Settings()
     settings.from_params({
@@ -29,16 +26,28 @@ if __name__ == "__main__":
         "sensor_width_mm": 10,
         "sensor_height_mm": 7.5,
         "f_mm": 16.0,
-        "visualize": False
+        "visualize": False,
+        "outdir": "C:\\Users\\svenw\\OneDrive\\Desktop\\results"
     })
 
     calib = Calibration(settings=settings)
+    stream = Stream(root / "single_cam" / "undistorted")
     cam = calib.calibrate_intrinsics(stream)
-
-    stream = Stream(Path.cwd() / "tests" / "data" /
-                    "single_cam" / "undistorted")
-    print("Number of frames:", stream.length)
-
+    stream = Stream(root / "single_cam" / "undistorted")
     cams = calib.calibrate_extrinsics(stream, cam)
-    for cam in cams:
-        print(cam.get_blender_mw())
+    depth_stream = Stream(root / "single_cam" / "depth")
+
+    stream.reset()
+    pcds = []
+    for i in [0, 1, 2, 3]:
+        cams[i].RT[0, 1] += 0.5*(np.random.random()-0.5)
+        cams[i].RT[1, 0] += 0.5*(np.random.random()-0.5)
+
+        pcd = register_depthmap_to_world(
+            cams[i],
+            depth_stream.get(i),
+            stream.get(i),
+            0.1)
+        pcds.append(pcd)
+
+    show_registration(pcds, True)

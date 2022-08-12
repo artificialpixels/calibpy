@@ -45,7 +45,7 @@ class Stream:
     @staticmethod
     def load_image(filename: str,
                    flag: int = cv2.IMREAD_GRAYSCALE) -> np.ndarray:
-        """Loading a single image using opencv flags 
+        """Loading a single image using opencv flags
         https://docs.opencv.org/3.4/d8/d6a/group__imgcodecs__flags.html)
 
         :param filename: image filename
@@ -189,6 +189,21 @@ class Stream:
                         self._filenames.append(fname)
         assert len(self._filenames) > 0, f"No images found in {self._dir}"
         self._sort_filenames()
+
+    def get(self, frame_number: int, flag: int = cv2.IMREAD_GRAYSCALE) -> np.ndarray:
+        """Read the frame with the the frame_number passed
+
+        :param frame_number: frame_number [0, stream.length-1]
+        :type frame_number: int
+        :param flag: opencv imread flag, defaults to cv2.IMREAD_GRAYSCALE
+        :type flag: int, optional
+        :return: image
+        :rtype: np.ndarray
+        """
+        if 0 <= frame_number < self.length:
+            fname = self._filenames[frame_number]
+            return Stream.load_image(fname, flag)
+        return None
 
     def next(self, flag: int = cv2.IMREAD_GRAYSCALE) -> np.ndarray:
         """Read the next frame

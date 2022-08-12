@@ -4,13 +4,12 @@ import pickle
 import numpy as np
 from glob import glob
 from pathlib import Path
-from mathutils import *
+from mathutils import Matrix
 
 CAMERAS_DIR = "C:\\Users\\svenw\\OneDrive\\Desktop\\results"
 
 
 def read_npys_from_dir(dirname: str) -> list:
-    cameras = []
     filenames = []
     for f in glob(CAMERAS_DIR + os.sep + "*.npy"):
         filenames.append(f)

@@ -118,6 +118,18 @@ class Camera(Serializer):
         return None
 
     @property
+    def fx(self):
+        if self.intrinsics is not None:
+            return self.intrinsics[0, 0]
+        return None
+
+    @property
+    def fy(self):
+        if self.intrinsics is not None:
+            return self.intrinsics[1, 1]
+        return None
+
+    @property
     def cx(self):
         if self.intrinsics is not None:
             return self.intrinsics[0, 2]

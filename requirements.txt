@@ -4,6 +4,7 @@ flake8
 imath
 matplotlib
 numpy
+scipy
 open3d
 opencv-contrib-python
 OpenEXR
