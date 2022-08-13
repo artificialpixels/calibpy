@@ -3,8 +3,8 @@ import unittest
 import numpy as np
 from glob import glob
 from pathlib import Path
-from calibpy.Stream import Stream
 from calibpy.Settings import Settings
+from calibpy.Stream import FileStream
 from calibpy.Calibration import Calibration
 from calibpy.Registration import register_depthmap_to_world
 
@@ -32,7 +32,9 @@ class TestCameraModule(unittest.TestCase):
                 os.remove(fname)
 
     def test_intrisics(self):
-        stream = Stream(self._root / "single_cam" / "undistorted")
+        stream = FileStream()
+        directory = self._root / "single_cam" / "undistorted"
+        stream.initialize(directory=directory)
         self.assertEqual(stream.length, 24)
 
         settings = Settings()
@@ -67,7 +69,9 @@ class TestCameraModule(unittest.TestCase):
         self.assertAlmostEqual(cam.distortion[0][4], -1.16823432e-01, places=2)
 
     def test_extrinsics(self):
-        stream = Stream(self._root / "single_cam" / "undistorted")
+        stream = FileStream()
+        directory = self._root / "single_cam" / "undistorted"
+        stream.initialize(directory=directory)
 
         settings = Settings()
         settings.from_params({
@@ -93,7 +97,10 @@ class TestCameraModule(unittest.TestCase):
         self._test_data_filenames.append(
             str(Path(settings.outdir) / "intrinsics.npy"))
 
-        stream = Stream(self._root / "single_cam" / "undistorted")
+        stream = FileStream()
+        directory = self._root / "single_cam" / "undistorted"
+        stream.initialize(directory=directory)
+
         cams = calib.calibrate_extrinsics(stream, cam)
         for cam in cams:
             cam.serialize(Path(settings.outdir) / f"{cam.name}.npy")
@@ -114,6 +121,7 @@ class TestCameraModule(unittest.TestCase):
                     self.assertTrue(test < 0.001)
 
     def test_registration(self):
+        # create a settings object
         settings = Settings()
         settings.from_params({
             "aruco_dict": "DICT_5X5",
@@ -132,11 +140,19 @@ class TestCameraModule(unittest.TestCase):
         })
 
         calib = Calibration(settings=settings)
-        stream = Stream(self._root / "single_cam" / "undistorted")
+        stream = FileStream()
+        directory = self._root / "single_cam" / "undistorted"
+        stream.initialize(directory=directory)
+
         cam = calib.calibrate_intrinsics(stream)
-        stream = Stream(self._root / "single_cam" / "undistorted")
+        stream = FileStream()
+        directory = self._root / "single_cam" / "undistorted"
+        stream.initialize(directory=directory)
+
         cams = calib.calibrate_extrinsics(stream, cam)
-        depth_stream = Stream(self._root / "single_cam" / "depth")
+        depth_stream = FileStream()
+        directory = self._root / "single_cam" / "depth"
+        depth_stream.initialize(directory=directory)
 
         stream.reset()
         pcds = []

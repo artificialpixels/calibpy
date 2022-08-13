@@ -3,10 +3,8 @@
 import numpy as np
 try:
     from Serializer import Serializer
-    from Stream import Stream
 except (ModuleNotFoundError, ImportError):
     from .Serializer import Serializer
-    from .Stream import Stream
 
 
 class Camera(Serializer):

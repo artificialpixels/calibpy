@@ -40,9 +40,6 @@ if __name__ == "__main__":
     stream.reset()
     pcds = []
     for i in [0, 1, 2, 3]:
-        cams[i].RT[0, 1] += 0.5*(np.random.random()-0.5)
-        cams[i].RT[1, 0] += 0.5*(np.random.random()-0.5)
-
         pcd = register_depthmap_to_world(
             cams[i],
             depth_stream.get(i),

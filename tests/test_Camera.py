@@ -2,7 +2,6 @@ import unittest
 import numpy as np
 from pathlib import Path
 from calibpy.Camera import Camera
-from calibpy.Stream import Stream
 
 
 class TestCameraModule(unittest.TestCase):
