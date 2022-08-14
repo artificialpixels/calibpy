@@ -28,9 +28,9 @@ class TestStreamModule(unittest.TestCase):
     def test_load_from_list(self):
         fs = FileStream()
         filenames = [
-            "D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted\\0001.png",
-            "D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted\\0002.png",
-            "D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted\\0003.png"]
+            str(self._root / "single_cam" / "undistorted" / "0001.png"),
+            str(self._root / "single_cam" / "undistorted" / "0002.png"),
+            str(self._root / "single_cam" / "undistorted" / "0003.png")]
         fs.initialize(filenames=filenames)
         for i in range(3):
             img = fs.next(flag=cv2.IMREAD_GRAYSCALE)
@@ -43,10 +43,10 @@ class TestStreamModule(unittest.TestCase):
         filenames = []
         for i in range(1, 25):
             filenames.append(
-                f"D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted\\{i:04d}.png")
+                str(self._root / "single_cam" / "undistorted" / f"{i:04d}.png"))
         fs = FileStream()
         fs.initialize(
-            directory="D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted")
+            directory=str(self._root / "single_cam" / "undistorted"))
 
         for i in range(24):
             img = fs.next(flag=cv2.IMREAD_GRAYSCALE)
@@ -64,10 +64,10 @@ class TestStreamModule(unittest.TestCase):
         filenames = []
         for i in range(10, 20):
             filenames.append(
-                f"D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted\\{i+1:04d}.png")
+                str(self._root / "single_cam" / "undistorted" / f"{i+1:04d}.png"))
         fs = FileStream()
         fs.initialize(
-            directory="D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted",
+            directory=str(self._root / "single_cam" / "undistorted"),
             from_frame=10,
             to_frame=20)
         for i in range(10):
@@ -84,9 +84,9 @@ class TestStreamModule(unittest.TestCase):
         fs = FileStream(is_looping=False)
         self.assertFalse(fs.is_looping)
         filenames = [
-            "D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted\\0001.png",
-            "D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted\\0002.png",
-            "D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted\\0003.png"]
+            str(self._root / "single_cam" / "undistorted" / "0001.png"),
+            str(self._root / "single_cam" / "undistorted" / "0002.png"),
+            str(self._root / "single_cam" / "undistorted" / "0003.png")]
         fs.initialize(filenames=filenames)
         for n in range(3):
             _ = fs.next()
