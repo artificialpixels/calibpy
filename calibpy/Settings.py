@@ -1,13 +1,31 @@
 import yaml
 from pathlib import Path
-from dataclasses import dataclass
 
 
-@dataclass
 class Settings:
 
     def __contains__(self, key: str) -> bool:
         return key in self.__dict__.keys()
+
+    def __eq__(self, other: object) -> bool:
+        def get_dict(obj):
+            out = {}
+            for key in obj.__dict__.keys():
+                if not key.startswith('__') and not callable(key):
+                    if not key.startswith('_'):
+                        print(key, type(key))
+                        out[key] = type(obj.__dict__[key])
+            return out
+
+        obj1 = get_dict(self)
+        obj2 = get_dict(other)
+        for key in obj1.keys():
+            if key in obj2.keys():
+                if obj1[key] != obj2[key]:
+                    return False
+            else:
+                return False
+        return True
 
     def ensure(self, key: str, dtype: type):
         if key not in self:
@@ -15,9 +33,6 @@ class Settings:
         if not isinstance(self.__dict__[key], dtype):
             raise RuntimeError(
                 "Invalid Settings Type: {key} expected to be type {type}!")
-
-    def has_key(self, key: str) -> bool:
-        return key in self.__dict__.keys()
 
     def save(self, save_dir: str, filename: str, with_timestamp=False):
         save_dir = Path(save_dir)
@@ -38,6 +53,16 @@ class Settings:
                 if not key.startswith('__') and not callable(key):
                     data[key] = self.__dict__[key]
             yaml.dump(data, file)
+
+    def from_file(self, filename: str):
+        if isinstance(filename, Path):
+            filename = str(filename)
+        assert (isinstance(filename, str))
+        assert Path(filename).is_file()
+
+        with open(filename, 'r') as file:
+            data = yaml.safe_load(file)
+        self.from_params(data)
 
     def from_params(self, params):
         for key in params.keys():

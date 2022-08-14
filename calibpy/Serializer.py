@@ -43,7 +43,6 @@ class Serializer:
         for key in self.__dict__.keys():
             if not key.startswith('__') and not callable(key):
                 if key.startswith('_'):
-                    print(key, type(key))
                     data[key] = self.__dict__[key]
         if filename is None:
             self.root = tempfile.gettempdir()

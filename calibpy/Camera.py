@@ -18,6 +18,8 @@ class Camera(Serializer):
     """
 
     def __init__(self):
+        super().__init__()
+
         self._name = None
         self._f_mm = None           # f in mm
         self._sensor_size = None    # size in mm, (y, x)

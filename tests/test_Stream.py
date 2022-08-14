@@ -80,6 +80,28 @@ class TestStreamModule(unittest.TestCase):
     def test_load_pre_suffixes_from_dir(self):
         pass
 
+    def test_looping(self):
+        fs = FileStream(is_looping=False)
+        self.assertFalse(fs.is_looping)
+        filenames = [
+            "D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted\\0001.png",
+            "D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted\\0002.png",
+            "D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted\\0003.png"]
+        fs.initialize(filenames=filenames)
+        for n in range(3):
+            _ = fs.next()
+            self.assertEqual(fs.current_filename(), filenames[n])
+        self.assertTrue(fs.next() is None)
+        fs.reset()
+        fs.is_looping = True
+        self.assertTrue(fs.is_looping)
+        for n in range(3):
+            _ = fs.next()
+            self.assertEqual(fs.current_filename(), filenames[n])
+        img = fs.next()
+        self.assertTrue(isinstance(img, np.ndarray))
+        self.assertEqual(fs.current_filename(), filenames[0])
+
     # def test_loading_samepatterns(self):
     #     stream = Stream()
     #     stream.load(dir=str(self._root / "dummy_images" / "same_pattern"))

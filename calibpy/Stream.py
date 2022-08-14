@@ -13,8 +13,31 @@ STREAM_FILETYPES = ["png", "jpg", "jpeg", "tif", "tiff", "exr"]
 
 class Stream:
 
+    def __init__(self, is_looping=True):
+
+        self._current_frame = -1
+        self._is_looping = is_looping
+
+    @property
+    def current_frame(self):
+        return self._current_frame
+
+    @property
+    def is_looping(self):
+        return self._is_looping
+
+    @is_looping.setter
+    def is_looping(self, value: bool):
+        assert isinstance(value, bool)
+        self._is_looping = value
+
+    def reset(self):
+        """Reset the frame counter to the first frame
+        """
+        self._current_frame = -1
+
     @abstractmethod
-    def initialize(self, *args, **kwargs):
+    def initialize(self, *args, **kwargs) -> bool:
         raise NotImplementedError(
             "Please derive from this class and do not use it directly!")
 
@@ -30,12 +53,15 @@ class Stream:
 
 
 class FileStream(Stream):
+    """Implementation of a Stream class that handles loading from file tasks.
+    The initialize method can handle loading a single specific filename, a list
+    of filenames or loading files from a directory. See the doc strings of the 
+    initialize method for more details.
+    """
 
-    def __init__(self):
-        super().__init__()
-
+    def __init__(self, is_looping=False):
+        super().__init__(is_looping)
         self._filenames = []
-        self._current_frame = -1
 
     @property
     def length(self):
@@ -44,11 +70,6 @@ class FileStream(Stream):
     @property
     def filenames(self):
         return self._filenames
-
-    def reset(self):
-        """Reset the frame counter to the first frame
-        """
-        self._current_frame = -1
 
     def current_filename(self) -> str:
         """Get the filename of the current frame
@@ -61,8 +82,9 @@ class FileStream(Stream):
         return None
 
     @staticmethod
-    def load_image(filename: str,
-                   flag: int = cv2.IMREAD_GRAYSCALE) -> np.ndarray:
+    def load_image(
+            filename: str,
+            flag: int = cv2.IMREAD_GRAYSCALE) -> np.ndarray:
         """Loading a single image using opencv flags
         https://docs.opencv.org/3.4/d8/d6a/group__imgcodecs__flags.html)
 
@@ -80,7 +102,9 @@ class FileStream(Stream):
             return cv2.imread(filename, flag)
 
     @staticmethod
-    def exrchannel2numpy(filename: str, channel_name="R") -> np.ndarray:
+    def exrchannel2numpy(
+            filename: str,
+            channel_name="R") -> np.ndarray:
         """Loading a single channel from a .ext file.
 
         :param filename: filename
@@ -96,7 +120,7 @@ class FileStream(Stream):
         size = (dw.max.x - dw.min.x + 1, dw.max.y - dw.min.y + 1)
         Float_Type = Imath.PixelType(Imath.PixelType.FLOAT)
         channel_str = file.channel(channel_name, Float_Type)
-        channel = np.fromstring(
+        channel = np.frombuffer(
             channel_str, dtype=np.float32).reshape(size[1], -1)
         return (channel)
 
@@ -128,7 +152,7 @@ class FileStream(Stream):
         return filenames
 
     @staticmethod
-    def read_directory(
+    def filenames_from_directory(
             dir: str,
             prefix: str = None,
             suffix: str = None):
@@ -181,7 +205,7 @@ class FileStream(Stream):
         assert isinstance(directory, str)
         assert Path(directory).is_dir()
         print("Load from dir: ", directory)
-        filenames = FileStream.read_directory(
+        filenames = FileStream.filenames_from_directory(
             directory, prefix=prefix, suffix=suffix)
         if from_frame > 0:
             filenames = filenames[from_frame:]
@@ -197,7 +221,7 @@ class FileStream(Stream):
         print("Load image from file: ", filename)
         self._from_list([filename])
 
-    def initialize(self, *args, **kwargs):
+    def initialize(self, *args, **kwargs) -> bool:
         print("Initialize FileStream:")
         if "directory" in kwargs.keys():
             from_frame = 0
@@ -218,14 +242,33 @@ class FileStream(Stream):
                 to_frame=to_frame,
                 prefix=prefix,
                 suffix=suffix)
+            if len(self._filenames) > 0:
+                return True
         elif "filename" in kwargs.keys():
             self._from_filename(kwargs["filename"])
         elif "filenames" in kwargs.keys():
             self._from_list(kwargs["filenames"])
-        else:
-            raise IOError("Could not valid parameter, expect: directory, filename or filenames!")
 
-    def get(self, index: int, *args, **kwargs):
+        if len(self._filenames) > 0:
+            return True
+        return False
+
+    def get(self, index: int = None, *args, **kwargs) -> np.ndarray:
+        """Access an arbitrary frame of the stream. If the index
+        passed is out of range, None is returned. If the index is None,
+        the image at the current_frame pointer is returned. An additional
+        parameter is flag to specify the opencv imread flag. Default
+        value is cv2.IMREAD_GRAYSCALE
+
+        :param index: frame pointer
+        :type index: int
+        :param flag: opencv imread flag, defaults to cv2.IMREAD_GRAYSCALE
+        :type index: int
+        :return: image
+        :rtype: np.ndarray
+        """
+        if index is None:
+            index = self._current_frame
         flag = cv2.IMREAD_GRAYSCALE
         if "flag" in kwargs.keys():
             flag = kwargs["flag"]
@@ -235,13 +278,24 @@ class FileStream(Stream):
             return FileStream.load_image(fname, flag)
         return None
 
-    def next(self, *args, **kwargs):
+    def next(self, *args, **kwargs) -> np.ndarray:
+        """Function returns the next image from the streams buffer.
+        If the buffer is empty and is_looping is set to True, the buffer 
+        is automtaically resetted, otherwise None is returned. The buffer 
+        can aslo be resetted manually using the method reset.
+
+        :return: image
+        :rtype: np.ndarray
+        """
         flag = cv2.IMREAD_GRAYSCALE
         if "flag" in kwargs.keys():
             flag = kwargs["flag"]
         self._current_frame += 1
-        if self._current_frame >= self.length:
-            return None
+        if self.current_frame >= self.length:
+            if self._is_looping:
+                self._current_frame = 0
+            else:
+                return None
         fname = self._filenames[self._current_frame]
         return FileStream.load_image(fname, flag)
 
