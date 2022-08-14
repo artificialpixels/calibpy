@@ -11,7 +11,7 @@ class TestStreamModule(unittest.TestCase):
         self._root = Path.cwd() / "tests" / "data"
 
     def test_load_filename(self):
-        filename = "D:\\Projects\\Python\\calibpy\\tests\\data\\single_cam\\undistorted\\0003.png"
+        filename = str(self._root / "single_cam" / "undistorted" / "0003.png")
         fs = FileStream()
         fs.initialize(filename=filename)
         img = fs.next(flag=cv2.IMREAD_GRAYSCALE)
