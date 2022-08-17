@@ -335,4 +335,3 @@ if __name__ == "__main__":
         register_from_frame=project_settings.register_from_frame,
         register_to_frame=project_settings.register_to_frame,
         lazy_intrinsics=project_settings.lazy_intrinsics)
-    a = 0

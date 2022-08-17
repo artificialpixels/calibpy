@@ -6,7 +6,7 @@ from glob import glob
 from pathlib import Path
 from mathutils import Matrix
 
-CAMERAS_DIR = "D:\\Projects\\Python\\calibpy\\tests\\data"
+CAMERAS_DIR = "D:\Tmp\scw_test"
 
 
 def read_npys_from_dir(dirname: str) -> list:
@@ -72,10 +72,6 @@ def create_camera(context: object, props: dict):
 
 
 if __name__ == "__main__":
-    #context = bpy.context
-    #filenames = read_npys_from_dir(CAMERAS_DIR)
-    #props = load_camera_props_from_file(filenames[0])
-    filename = str(Path(CAMERAS_DIR) / "demo_0003_extrinsics.npy")
+    filename = str(Path(CAMERAS_DIR) / "extrinsics_000000.npy")
     props = load_camera_props_from_file(filename)
-    print(props)
     create_camera(bpy.context, props)

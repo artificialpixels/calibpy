@@ -2,11 +2,16 @@ import numpy as np
 import open3d as o3d
 
 from calibpy.Camera import Camera
+from calibpy.Calibration import Calibration
 
 
-def load_as_rgbd(depth_map, color_img=None):
+def load_as_rgbd(camera, depth_map, color_img=None):
     if color_img is None:
         color_img = np.ones(list(depth_map.shape)+[3], dtype=np.uint8)*200
+    color_img = Calibration.undistort_image(
+        color_img,
+        camera.intrinsics,
+        camera.distortion)
     color_raw = o3d.geometry.Image(color_img.astype(np.uint8))
     dmap = np.copy(depth_map)
     dmap *= 1000
@@ -40,7 +45,7 @@ def register_depthmap_to_world(
         camera.cx,
         camera.cy)
 
-    rgbd = load_as_rgbd(depth_map, color_img)
+    rgbd = load_as_rgbd(camera, depth_map, color_img)
     pcd = o3d.geometry.PointCloud.create_from_rgbd_image(
         rgbd,
         o3d_cam,
