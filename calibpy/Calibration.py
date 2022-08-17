@@ -29,6 +29,22 @@ class Calibration:
             self.setup(settings)
 
     @staticmethod
+    def undistort_image(
+            img: np.ndarray,
+            intrinsics: np.ndarray,
+            distortion: np.ndarray):
+        h, w = img.shape[:2]
+        newcameramatrix, roi = cv2.getOptimalNewCameraMatrix(
+            intrinsics, distortion, (w, h), 1, (w, h))
+        undistorted = cv2.undistort(
+            img, intrinsics, distortion, None, newcameramatrix)
+        roi_x, roi_y, roi_w, roi_h = roi
+        undistorted = undistorted[roi_y: roi_y + roi_h, roi_x: roi_x + roi_w]
+        undistorted = cv2.resize(
+            undistorted, (w, h), interpolation=cv2.INTER_AREA)
+        return undistorted
+
+    @staticmethod
     def show_image(img: np.ndarray,
                    text: str = "",
                    proportion: int = 1000,
@@ -113,6 +129,12 @@ class Calibration:
             if cam.intrinsics is None or cam.distortion is None:
                 print("Missing internal calibration")
                 raise RuntimeError("Calibration Failed!")
+
+            img = Calibration.undistort_image(
+                img,
+                cam.intrinsics,
+                cam.distortion
+            )
 
             # get targets aruco corners
             response, charuco_corners, charuco_ids, corners = \

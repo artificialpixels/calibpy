@@ -54,6 +54,7 @@ class Serializer:
             self.location = filename
             with open(filename, "wb") as f:
                 pickle.dump(data, f)
+                print(f"File {filename} saved")
         return data
 
     def load(self, filename: str):
@@ -63,9 +64,12 @@ class Serializer:
         :param filename: dump file filename
         :type filename: str
         """
-        assert Path(filename).is_file()
-        assert Path(filename).suffix == ".npy"
-        with open(filename, "rb") as f:
+        if isinstance(filename, str):
+            filename = Path(filename)
+        assert isinstance(filename, Path)
+        assert filename.is_file()
+        assert filename.suffix == ".npy"
+        with filename.open(mode="rb") as f:
             data = pickle.load(f)
         for key, value in data.items():
             setattr(self, key, value)

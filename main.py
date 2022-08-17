@@ -1,50 +1,28 @@
-import open3d as o3d
-import numpy as np
 from pathlib import Path
 
-from calibpy.Stream import Stream
 from calibpy.Settings import Settings
-from calibpy.Calibration import Calibration
+from calibpy.Stream import FileStream
+from workflows import instric_calibration
 
-from calibpy.Registration import load_as_rgbd, register_depthmap_to_world, show_registration
+ROOT = Path.cwd() / "tests" / "data"
+
+
+def main_instric_calibration():
+    # To get access to data in a form the calibration objects
+    # understands we always fir create a Stream object. In this
+    # case we create an FileStream instance that can read images
+    # from disc
+    fs = FileStream()
+    # We read all files from a directory by passing a directory str
+    fs.initialize(directory=str(ROOT / "single_cam" / "undistorted"))
+
+    # To control the processing we need a Seetings object we can
+    # initialize via a dictionary or from a .yaml file
+    settings = Settings()
+    settings.from_file(str(ROOT / "demo_settings_intrinsic_calibration.yaml"))
+
+    instric_calibration(fs, settings)
 
 
 if __name__ == "__main__":
-    root = Path.cwd() / "tests" / "data"
-
-    settings = Settings()
-    settings.from_params({
-        "aruco_dict": "DICT_5X5",
-        "cols": 24,
-        "rows": 18,
-        "square_size": 0.080,
-        "marker_size": 0.062,
-        "min_number_of_corners": 20,
-        "min_number_of_calibration_images": 20,
-        "max_count": 10000,
-        "epsilon": 0.00001,
-        "sensor_width_mm": 10,
-        "sensor_height_mm": 7.5,
-        "f_mm": 16.0,
-        "visualize": False,
-        "outdir": "C:\\Users\\svenw\\OneDrive\\Desktop\\results"
-    })
-
-    calib = Calibration(settings=settings)
-    stream = Stream(root / "single_cam" / "undistorted")
-    cam = calib.calibrate_intrinsics(stream)
-    stream = Stream(root / "single_cam" / "undistorted")
-    cams = calib.calibrate_extrinsics(stream, cam)
-    depth_stream = Stream(root / "single_cam" / "depth")
-
-    stream.reset()
-    pcds = []
-    for i in [0, 1, 2, 3]:
-        pcd = register_depthmap_to_world(
-            cams[i],
-            depth_stream.get(i),
-            stream.get(i),
-            0.1)
-        pcds.append(pcd)
-
-    show_registration(pcds, True)
+    main_instric_calibration()

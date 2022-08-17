@@ -4,6 +4,9 @@ from pathlib import Path
 
 class Settings:
 
+    def __init__(self):
+        self._location = None
+
     def __contains__(self, key: str) -> bool:
         return key in self.__dict__.keys()
 
@@ -26,6 +29,10 @@ class Settings:
             else:
                 return False
         return True
+
+    @property
+    def location(self):
+        return self._location
 
     def ensure(self, key: str, dtype: type):
         if key not in self:
@@ -62,6 +69,10 @@ class Settings:
 
         with open(filename, 'r') as file:
             data = yaml.safe_load(file)
+        self._location = Path(filename).parent.absolute()
+        if "outdir" in data.keys():
+            if data["outdir"] == ".":
+                data["outdir"] = Path(filename).parent
         self.from_params(data)
 
     def from_params(self, params):
