@@ -2,7 +2,7 @@ from pathlib import Path
 
 from calibpy.Settings import Settings
 from calibpy.Stream import FileStream
-from workflows import instric_calibration
+from single_cam_calibration import instric_calibration
 
 ROOT = Path.cwd() / "tests" / "data"
 

@@ -1,0 +1,10 @@
+project_dir: D:\Tmp
+project_name: scw_test
+intrinsic_calibration_input_dir: tests\data\single_cam\distorted
+calibration_config_file: tests\data\demo_calibration_settings.yaml
+extrinsic_calibration_input: tests\data\single_cam\distorted
+depth_registration_input: tests\data\single_cam\depth
+color_registration_input: tests\data\single_cam\distorted
+register_from_frame: 0
+register_to_frame: 4
+lazy_intrinsics: true

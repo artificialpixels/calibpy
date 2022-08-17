@@ -11,5 +11,3 @@ sensor_height_mm: 7.5
 sensor_width_mm: 10
 square_size: 0.08
 visualize: true
-outdir: "tmp"
-outname: "demo"

@@ -81,6 +81,7 @@ class Settings:
 
     def from_config(self, config_filename: str):
         fname = Path(config_filename)
+        self._location = fname.parent
         assert fname.is_file()
         assert fname.suffix == ".yaml"
         with fname.open() as f:
