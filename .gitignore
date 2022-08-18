@@ -1,5 +1,6 @@
 # project related
 tests/data/tmp
+sandbox.py
 
 # blender related
 *.blend1

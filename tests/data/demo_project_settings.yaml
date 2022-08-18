@@ -7,4 +7,4 @@ depth_registration_input: tests\data\single_cam\depth
 color_registration_input: tests\data\single_cam\distorted
 register_from_frame: 0
 register_to_frame: 4
-lazy_intrinsics: true
+lazy_intrinsics: false

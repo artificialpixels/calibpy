@@ -3,7 +3,7 @@ from calibpy.Camera import Camera
 from calibpy.Stream import FileStream
 from calibpy.Settings import Settings
 from calibpy.Calibration import Calibration
-from calibpy.Registration import register_depthmap_to_world
+from calibpy.Registration import register_depthmap_to_world, show_registration
 
 with_o3d = True
 try:
@@ -234,6 +234,7 @@ def single_camera_workflow(
 
     # create a Calibration instance and pass the settings object
     calib = Calibration(settings=settings)
+    calib.visualize = False
 
     # ***** Intrinsic calibration *****
     intr = instric_calibration(
@@ -335,3 +336,5 @@ if __name__ == "__main__":
         register_from_frame=project_settings.register_from_frame,
         register_to_frame=project_settings.register_to_frame,
         lazy_intrinsics=project_settings.lazy_intrinsics)
+
+    show_registration(pcds)
