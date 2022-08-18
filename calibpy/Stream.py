@@ -249,7 +249,7 @@ class FileStream(Stream):
             if Path(kwargs["filename"]).is_file():
                 self._from_filename(kwargs["filename"])
         elif "filenames" in kwargs.keys():
-            if isinstance(kwargs["filenames"]):
+            if isinstance(kwargs["filenames"], list):
                 self._from_list(kwargs["filenames"])
 
         if len(self._filenames) > 0:
