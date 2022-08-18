@@ -161,24 +161,25 @@ class TestCameraModule(unittest.TestCase):
 
         stream.reset()
         pcds = []
-        means = np.zeros((4, 3), dtype=np.float32)
+        merged = None
         for i in range(4):
             pcd = register_depthmap_to_world(
                 cams[i],
                 depth_stream.get(i),
                 stream.get(i),
                 0.1)
-            mean, _ = pcd.compute_mean_and_covariance()
-            means[i, :] = mean
+            if merged is None:
+                merged = pcd
+            else:
+                merged += pcd
             pcds.append(pcd)
 
-        # TODO: This is not a good test yet, please refactor
-        std_x = np.std(means[:, 0])
-        std_y = np.std(means[:, 1])
-        std_z = np.std(means[:, 2])
-        self.assertTrue(std_x < 0.1)
-        self.assertTrue(std_y < 0.1)
-        self.assertTrue(std_z < 0.03)
+        bbox = merged.get_axis_aligned_bounding_box()
+        maxb = bbox.max_bound
+        minb = bbox.min_bound
+        self.assertTrue((maxb[0]-minb[0])-2.7045092166984497 < 0.1)
+        self.assertTrue((maxb[1]-minb[1])-2.466959368288604 < 0.1)
+        self.assertTrue((maxb[2]-minb[2])-0.4866462015080666 < 0.1)
 
 
 if __name__ == '__main__':

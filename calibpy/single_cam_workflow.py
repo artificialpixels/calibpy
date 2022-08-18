@@ -1,16 +1,10 @@
 from pathlib import Path
+import open3d as o3d
 from calibpy.Camera import Camera
 from calibpy.Stream import FileStream
 from calibpy.Settings import Settings
 from calibpy.Calibration import Calibration
 from calibpy.Registration import register_depthmap_to_world, show_registration
-
-with_o3d = True
-try:
-    import open3d as o3d
-except:
-    print("Couldn't find package open3d - http://www.open3d.org/")
-    with_o3d = False
 
 
 def get_savename_pattern(
@@ -34,6 +28,10 @@ def get_savename_pattern(
         fname = save_dir / f"{name}{entry}{ftype}"
         fname.parent.mkdir(parents=True, exist_ok=True)
     return fname
+
+
+def show_pcl_set(pcds: list):
+    show_registration(pcds)
 
 
 def instric_calibration(
@@ -123,7 +121,8 @@ def register_view(
         extrinsics: Camera,
         out_dir: Path,
         register_from_frame: int = 0,
-        register_to_frame: int = 0):
+        register_to_frame: int = 0,
+        blender_conform: bool = True):
 
     if isinstance(out_dir, str):
         out_dir = Path(out_dir)
@@ -147,7 +146,8 @@ def register_view(
         extrinsics,
         fs_depths.get(0),
         fs_imgs.get(0),
-        0.1)
+        0.1,
+        blender_conform)
 
     # save pointcloud if out_dir wasn't None
     fname = get_savename_pattern(
@@ -166,7 +166,8 @@ def register_stream(
         extrinsics: list,
         out_dir: Path,
         register_from_frame: int = 0,
-        register_to_frame: int = 0):
+        register_to_frame: int = 0,
+        blender_conform: bool = True):
 
     if isinstance(out_dir, str):
         out_dir = Path(out_dir)
@@ -192,7 +193,8 @@ def register_stream(
             extrinsics[i],
             fs_depths.get(i),
             fs_imgs.get(i),
-            0.1)
+            0.1,
+            blender_conform)
         pcds.append(pcd)
 
         # save each pointcloud if out_dir wasn't None
@@ -207,7 +209,7 @@ def register_stream(
     return pcds
 
 
-def single_camera_workflow(
+def single_cam_workflow(
         project_dir: str,
         project_name: str,
         intrinsic_calibration_input_dir: str,
@@ -215,9 +217,11 @@ def single_camera_workflow(
         extrinsic_calibration_input: str = None,
         depth_registration_input: str = None,
         color_registration_input: str = None,
+        blender_conform: bool = True,
         register_from_frame: int = 0,
         register_to_frame: int = 1,
-        lazy_intrinsics: bool = True):
+        lazy_intrinsics: bool = True,
+        visualize: bool = True):
     intr = None
     extr = None
     extrs = None
@@ -234,7 +238,7 @@ def single_camera_workflow(
 
     # create a Calibration instance and pass the settings object
     calib = Calibration(settings=settings)
-    calib.visualize = False
+    calib.visualize = visualize
 
     # ***** Intrinsic calibration *****
     intr = instric_calibration(
@@ -274,7 +278,7 @@ def single_camera_workflow(
             register_to_frame=register_to_frame)
 
     # ***** If no depth map registration desired we're done here
-    if depth_registration_input is None or not with_o3d:
+    if depth_registration_input is None:
         return intr, extrs, None
 
     # ***** Check if single view or stream mode is needed
@@ -295,7 +299,8 @@ def single_camera_workflow(
             extrinsics=extrs[0],
             out_dir=out_root,
             register_from_frame=register_from_frame,
-            register_to_frame=register_to_frame)
+            register_to_frame=register_to_frame,
+            blender_conform=blender_conform)
     # ***** Registration of a depth stream *****
     else:
         if not Path(color_registration_input).is_dir():
@@ -306,35 +311,7 @@ def single_camera_workflow(
             extrinsics=extrs,
             out_dir=out_root,
             register_from_frame=register_from_frame,
-            register_to_frame=register_to_frame)
+            register_to_frame=register_to_frame,
+            blender_conform=blender_conform)
 
     return intr, extrs, pcds
-
-
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input', help="Project settings file")
-    args = parser.parse_args()
-
-    project_settings = "tests\\data\\demo_project_settings.yaml"
-    if args.input:
-        project_settings = args.input
-
-    project_settings = Settings()
-    project_settings.from_config("tests\\data\\demo_project_settings.yaml")
-
-    intr, extrs, pcds = single_camera_workflow(
-        project_dir=project_settings.project_dir,
-        project_name=project_settings.project_name,
-        intrinsic_calibration_input_dir=project_settings.intrinsic_calibration_input_dir,
-        calibration_config_file=project_settings.calibration_config_file,
-        extrinsic_calibration_input=project_settings.extrinsic_calibration_input,
-        depth_registration_input=project_settings.depth_registration_input,
-        color_registration_input=project_settings.color_registration_input,
-        register_from_frame=project_settings.register_from_frame,
-        register_to_frame=project_settings.register_to_frame,
-        lazy_intrinsics=project_settings.lazy_intrinsics)
-
-    show_registration(pcds)

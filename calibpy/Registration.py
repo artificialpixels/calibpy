@@ -1,12 +1,13 @@
-from re import U
-import numpy as np
-import open3d as o3d
-
-from calibpy.Camera import Camera
 from calibpy.Calibration import Calibration
+from calibpy.Camera import Camera
+import open3d as o3d
+import numpy as np
 
 
-def project_3d(depth_map: np.ndarray, color_img: np.ndarray, camera: Camera):
+BLENDER_CONFORM = True
+
+
+def project_3d_blender_conform(depth_map: np.ndarray, color_img: np.ndarray, camera: Camera):
     if color_img is None:
         color_img = np.ones(list(depth_map.shape)+[3], dtype=np.uint8)*200
     color_img = Calibration.undistort_image(
@@ -46,13 +47,6 @@ def project_3d(depth_map: np.ndarray, color_img: np.ndarray, camera: Camera):
     xyz[2, :] = np.reshape(z, -1)
     xyz[3, :] = 1
 
-    # for i in range(xyz.shape[0]):
-    for i in range(1):
-        t = camera.RTb @ xyz[:, i]
-        t1 = np.dot(camera.RTb, xyz[:, i])
-        #xyz[i, :] = t
-    #xyz = np.dot(xyz, np.linalg.inv(camera.RTb))
-
     xyz = np.matmul(camera.RTb, xyz)
     for i in range(3):
         pcl[:, i] = xyz[i, :]
@@ -89,7 +83,8 @@ def register_depthmap_to_world(
         camera: Camera,
         depth_map: np.ndarray,
         color_img: np.ndarray = None,
-        downsample_factor: float = 0.1):
+        downsample_factor: float = 0.1,
+        blender_conform: bool = True):
 
     assert camera.image_size is not None
     assert camera.fx is not None
@@ -98,20 +93,22 @@ def register_depthmap_to_world(
     assert camera.cy is not None
     assert camera.RT is not None
 
-    # o3d_cam = o3d.camera.PinholeCameraIntrinsic(
-    #     width=camera.image_size[1],
-    #     height=camera.image_size[0],
-    #     fx=camera.fx,
-    #     fy=camera.fy,
-    #     cx=camera.cx,
-    #     cy=camera.cy)
+    if blender_conform:
+        pcd = project_3d_blender_conform(depth_map, color_img, camera)
+    else:
+        o3d_cam = o3d.camera.PinholeCameraIntrinsic(
+            width=camera.image_size[1],
+            height=camera.image_size[0],
+            fx=camera.fx,
+            fy=camera.fy,
+            cx=camera.cx,
+            cy=camera.cy)
+        rgbd = load_as_rgbd(camera, depth_map, color_img)
+        pcd = o3d.geometry.PointCloud.create_from_rgbd_image(
+            rgbd,
+            o3d_cam,
+            camera.RT)
 
-    pcd = project_3d(depth_map, color_img, camera)
-    # rgbd = load_as_rgbd(camera, depth_map, color_img)
-    # pcd = o3d.geometry.PointCloud.create_from_rgbd_image(
-    #     rgbd,
-    #     o3d_cam,
-    #     camera.RT)
     pcd = pcd.random_down_sample(downsample_factor)
     return pcd
 
