@@ -20,10 +20,6 @@ class Calibration:
     """
 
     def __init__(self, settings: Settings = None):
-        """
-        :param settings: Settings instance, defaults to None
-        :type settings: Settings, optional
-        """
         self._settings = None       # Settings instance
         self._aruco_target = None   # Aruco target descriptor
         self._board = None          # Aruco board
@@ -47,7 +43,18 @@ class Calibration:
     def undistort_image(
             img: np.ndarray,
             intrinsics: np.ndarray,
-            distortion: np.ndarray):
+            distortion: np.ndarray) -> np.ndarray:
+        """Apply undistortion on input image
+
+        :param img: input image
+        :type img: np.ndarray
+        :param intrinsics: 3x3 intric matrix
+        :type intrinsics: np.ndarray
+        :param distortion: k1,k2,p1,p2,k3
+        :type distortion: np.ndarray
+        :return: undistorted image
+        :rtype: np.ndarray
+        """
         h, w = img.shape[:2]
         newcameramatrix, roi = cv2.getOptimalNewCameraMatrix(
             intrinsics, distortion, (w, h), 1, (w, h))
@@ -119,8 +126,15 @@ class Calibration:
                           self._settings.epsilon)
 
     def calibrate_extrinsics(self, stream: Stream, cam: Camera) -> list:
-        # self._settings.ensure("min_number_of_corners", int)
-        # self._settings.ensure("min_number_of_calibration_images", int)
+        """calibrate extrinsics from input stream 
+
+        :param stream: Stream instance
+        :type stream: Stream
+        :param cam: Camera instance with instrinsics
+        :type cam: Camera
+        :return: list of cameras with extrinsics
+        :rtype: list
+        """
         cams = []
 
         image_size = None

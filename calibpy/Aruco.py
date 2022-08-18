@@ -4,7 +4,6 @@
 :Sponsor: SpexAI GmbH
 """
 
-
 import cv2
 import numpy as np
 

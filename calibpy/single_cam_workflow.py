@@ -1,3 +1,9 @@
+"""
+:Copyrights: Artificial Pixels
+:Author: Sven Wanner (artificial.pixels@gmail.com)
+:Sponsor: SpexAI GmbH
+"""
+
 from pathlib import Path
 import open3d as o3d
 from calibpy.Camera import Camera
