@@ -10,7 +10,10 @@ import open3d as o3d
 import numpy as np
 
 
-def project_3d_blender_conform(depth_map: np.ndarray, color_img: np.ndarray, camera: Camera):
+def project_3d_blender_conform(
+        depth_map: np.ndarray,
+        color_img: np.ndarray,
+        camera: Camera):
     if color_img is None:
         color_img = np.ones(list(depth_map.shape)+[3], dtype=np.uint8)*200
     color_img = Calibration.undistort_image(

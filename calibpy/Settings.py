@@ -97,7 +97,7 @@ class Settings:
             setattr(self, key, params[key])
 
     def from_config(self, config_filename: str):
-        """Set atttributes via .yaml config files. Each entry 
+        """Set atttributes via .yaml config files. Each entry
         is added as class attribute and can be accessed as such
         afterwards.
 

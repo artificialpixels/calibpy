@@ -4,7 +4,6 @@
 :Sponsor: SpexAI GmbH
 """
 
-
 import os
 import bpy
 import pickle
@@ -13,7 +12,7 @@ from glob import glob
 from pathlib import Path
 from mathutils import Matrix
 
-CAMERAS_DIR = "D:\Tmp\scw_test"
+CAMERAS_DIR = "D:\\Tmp\\scw_test"
 
 
 def read_npys_from_dir(dirname: str) -> list:

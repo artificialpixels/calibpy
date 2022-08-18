@@ -10,12 +10,15 @@ from pathlib import Path
 import matplotlib.pylab as plt
 from calibpy.Camera import Camera
 from calibpy.Settings import Settings
-from calibpy.Aruco import ArucoTarget, get_aruco_corners, create_aruco_board
+from calibpy.Aruco import (
+    ArucoTarget,
+    get_aruco_corners,
+    create_aruco_board)
 from calibpy.Stream import Stream
 
 
 class Calibration:
-    """Calibration class handling intrinsic 
+    """Calibration class handling intrinsic
     and extrinsic calibrations of aruco targets.
     """
 
@@ -126,7 +129,7 @@ class Calibration:
                           self._settings.epsilon)
 
     def calibrate_extrinsics(self, stream: Stream, cam: Camera) -> list:
-        """calibrate extrinsics from input stream 
+        """calibrate extrinsics from input stream
 
         :param stream: Stream instance
         :type stream: Stream
@@ -205,7 +208,7 @@ class Calibration:
         return cams
 
     def calibrate_intrinsics(self, stream: Stream) -> Camera:
-        """calibrate instrinsics from input stream 
+        """calibrate instrinsics from input stream
 
         :param stream: Stream instance
         :type stream: Stream
@@ -213,6 +216,7 @@ class Calibration:
         :return: Camera instance
         :rtype: Camera
         """
+
         frame = 0               # current frame
         accepted_images = 0     # number of images accepted for calibration
         corners_all = []        # corners discovered in all images processed
@@ -328,5 +332,6 @@ class Calibration:
             print(f"Focal Length from settings: {self._settings.f_mm} mm")
             print(f"Focal Length estimated: {cam.f_mm} mm")
             print(
-                f"Focal Length Difference: {abs(cam.f_mm - self._settings.f_mm)} mm")
+                "Focal Length Difference:",
+                "f{abs(cam.f_mm - self._settings.f_mm)} mm")
         return cam

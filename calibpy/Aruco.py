@@ -11,7 +11,7 @@ import numpy as np
 def get_aruco_dict(dict_key: str) -> int:
     """returns the opencv aruco dict identifier from settings string
 
-    :param dict_key: identifier string DICT_NXN N=[4,5,6,7] 
+    :param dict_key: identifier string DICT_NXN N=[4,5,6,7]
     :type dict_key: str
     :raises IOError: if identifier not found
     :return: aruco dict identifier

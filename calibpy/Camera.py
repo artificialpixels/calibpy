@@ -281,7 +281,8 @@ class Camera(Serializer):
         self.RT = Rt
 
     def compute_f_mm(self):
-        """ Compute focal length in mm if image size and sensor size are available
+        """ Compute focal length in mm if image
+            size and sensor size are available
         """
         if self.image_size is None or self.sensor_size_mm is None:
             return
