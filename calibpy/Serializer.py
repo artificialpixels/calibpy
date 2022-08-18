@@ -14,9 +14,6 @@ class Serializer:
     can be used to instantiate the class from file.
     """
 
-    def __init__(self):
-        print("Serializer initialized!")
-
     def __str__(self):
         string = ""
         data = self.serialize()
