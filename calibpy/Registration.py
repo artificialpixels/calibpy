@@ -4,9 +4,6 @@ import open3d as o3d
 import numpy as np
 
 
-BLENDER_CONFORM = True
-
-
 def project_3d_blender_conform(depth_map: np.ndarray, color_img: np.ndarray, camera: Camera):
     if color_img is None:
         color_img = np.ones(list(depth_map.shape)+[3], dtype=np.uint8)*200
@@ -57,7 +54,6 @@ def project_3d_blender_conform(depth_map: np.ndarray, color_img: np.ndarray, cam
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(pcl)
     pcd.colors = o3d.utility.Vector3dVector(rgb)
-    # pcd.transform(np.linalg.inv(camera.RTb))
     return pcd
 
 
