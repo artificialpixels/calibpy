@@ -224,30 +224,33 @@ class FileStream(Stream):
     def initialize(self, *args, **kwargs) -> bool:
         print("Initialize FileStream:")
         if "directory" in kwargs.keys():
-            from_frame = 0
-            to_frame = 0
-            prefix = None
-            suffix = None
-            if "from_frame" in kwargs.keys():
-                from_frame = kwargs["from_frame"]
-            if "to_frame" in kwargs.keys():
-                to_frame = kwargs["to_frame"]
-            if "prefix" in kwargs.keys():
-                prefix = kwargs["prefix"]
-            if "suffix" in kwargs.keys():
-                suffix = kwargs["suffix"]
-            self._from_dir(
-                directory=kwargs["directory"],
-                from_frame=from_frame,
-                to_frame=to_frame,
-                prefix=prefix,
-                suffix=suffix)
-            if len(self._filenames) > 0:
-                return True
+            if Path(kwargs["directory"]).is_dir():
+                from_frame = 0
+                to_frame = 0
+                prefix = None
+                suffix = None
+                if "from_frame" in kwargs.keys():
+                    from_frame = kwargs["from_frame"]
+                if "to_frame" in kwargs.keys():
+                    to_frame = kwargs["to_frame"]
+                if "prefix" in kwargs.keys():
+                    prefix = kwargs["prefix"]
+                if "suffix" in kwargs.keys():
+                    suffix = kwargs["suffix"]
+                self._from_dir(
+                    directory=kwargs["directory"],
+                    from_frame=from_frame,
+                    to_frame=to_frame,
+                    prefix=prefix,
+                    suffix=suffix)
+                if len(self._filenames) > 0:
+                    return True
         elif "filename" in kwargs.keys():
-            self._from_filename(kwargs["filename"])
+            if Path(kwargs["filename"]).is_file():
+                self._from_filename(kwargs["filename"])
         elif "filenames" in kwargs.keys():
-            self._from_list(kwargs["filenames"])
+            if isinstance(kwargs["filenames"], list):
+                self._from_list(kwargs["filenames"])
 
         if len(self._filenames) > 0:
             return True
@@ -267,6 +270,8 @@ class FileStream(Stream):
         :return: image
         :rtype: np.ndarray
         """
+        if self.length <= 0:
+            return None
         if index is None:
             index = self._current_frame
         flag = cv2.IMREAD_GRAYSCALE
@@ -287,6 +292,8 @@ class FileStream(Stream):
         :return: image
         :rtype: np.ndarray
         """
+        if self.length <= 0:
+            return None
         flag = cv2.IMREAD_GRAYSCALE
         if "flag" in kwargs.keys():
             flag = kwargs["flag"]

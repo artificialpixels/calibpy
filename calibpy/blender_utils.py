@@ -6,7 +6,7 @@ from glob import glob
 from pathlib import Path
 from mathutils import Matrix
 
-CAMERAS_DIR = "C:\\Users\\svenw\\OneDrive\\Desktop\\results"
+CAMERAS_DIR = "D:\Tmp\scw_test"
 
 
 def read_npys_from_dir(dirname: str) -> list:
@@ -50,8 +50,8 @@ def matrix_from_numpy(array: np.ndarray) -> Matrix:
 
 def create_camera(context: object, props: dict):
     cam_name = "CalibpyCam"
-    if props["name"] is not None and props["name"] != "":
-        cam_name = props["name"]
+    if props["_name"] is not None and props["_name"] != "":
+        cam_name = props["_name"]
     if cam_name in bpy.data.objects.keys():
         delete_object(context, bpy.data.objects[cam_name])
 
@@ -64,19 +64,14 @@ def create_camera(context: object, props: dict):
 
     cam = find_latest_object_by_name(context, "Camera")
     cam.name = cam_name
-    cam.data.sensor_height = props['sensor_size'][0]
-    cam.data.sensor_width = props['sensor_size'][1]
+    cam.data.sensor_height = props['_sensor_size'][0]
+    cam.data.sensor_width = props['_sensor_size'][1]
     cam.data.lens_unit = 'MILLIMETERS'
-    cam.data.lens = props['f_mm']
-    cam.matrix_world = matrix_from_numpy(props['RTb'])
+    cam.data.lens = props['_f_mm']
+    cam.matrix_world = matrix_from_numpy(props['_RTb'])
 
 
 if __name__ == "__main__":
-    context = bpy.context
-    filenames = read_npys_from_dir(CAMERAS_DIR)
-    props = load_camera_props_from_file(filenames[0])
-    create_camera(context, props)
-    props = load_camera_props_from_file(filenames[1])
-    create_camera(context, props)
-    props = load_camera_props_from_file(filenames[2])
-    create_camera(context, props)
+    filename = str(Path(CAMERAS_DIR) / "extrinsics_000000.npy")
+    props = load_camera_props_from_file(filename)
+    create_camera(bpy.context, props)

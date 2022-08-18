@@ -24,9 +24,35 @@ class Calibration:
         self._board = None          # Aruco board
         self._board_pts = None      # Board 3D Points
         self._board_pts_ids = None  # Board Ids
+        self._visualize = False     # En-/Disables visualization
 
         if settings is not None:
             self.setup(settings)
+
+    @property
+    def visualize(self):
+        return self._visualize
+
+    @visualize.setter
+    def visualize(self, value: bool):
+        assert isinstance(value, bool)
+        self._visualize = value
+
+    @staticmethod
+    def undistort_image(
+            img: np.ndarray,
+            intrinsics: np.ndarray,
+            distortion: np.ndarray):
+        h, w = img.shape[:2]
+        newcameramatrix, roi = cv2.getOptimalNewCameraMatrix(
+            intrinsics, distortion, (w, h), 1, (w, h))
+        undistorted = cv2.undistort(
+            img, intrinsics, distortion, None, newcameramatrix)
+        roi_x, roi_y, roi_w, roi_h = roi
+        undistorted = undistorted[roi_y: roi_y + roi_h, roi_x: roi_x + roi_w]
+        undistorted = cv2.resize(
+            undistorted, (w, h), interpolation=cv2.INTER_AREA)
+        return undistorted
 
     @staticmethod
     def show_image(img: np.ndarray,
@@ -92,10 +118,6 @@ class Calibration:
         # self._settings.ensure("min_number_of_calibration_images", int)
         cams = []
 
-        visualize = False
-        if "visualize" in self._settings:
-            visualize = self._settings.visualize
-
         image_size = None
         while True:
             # get next image
@@ -114,11 +136,17 @@ class Calibration:
                 print("Missing internal calibration")
                 raise RuntimeError("Calibration Failed!")
 
+            img = Calibration.undistort_image(
+                img,
+                cam.intrinsics,
+                cam.distortion
+            )
+
             # get targets aruco corners
             response, charuco_corners, charuco_ids, corners = \
                 get_aruco_corners(img, self._aruco_target, self._criteria)
 
-            if visualize:
+            if self.visualize:
                 vis = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
                 vis = cv2.aruco.drawDetectedMarkers(image=vis, corners=corners)
                 if response >= self._settings.min_number_of_corners:
@@ -174,10 +202,6 @@ class Calibration:
         self._settings.ensure("min_number_of_corners", int)
         self._settings.ensure("min_number_of_calibration_images", int)
 
-        visualize = False
-        if "visualize" in self._settings:
-            visualize = self._settings.visualize
-
         min_N = self._settings.min_number_of_calibration_images
         image_size = None
 
@@ -199,7 +223,7 @@ class Calibration:
             response, charuco_corners, charuco_ids, corners = \
                 get_aruco_corners(img, self._aruco_target, self._criteria)
 
-            if visualize:
+            if self.visualize:
                 # outline the aruco markers found in our query image
                 vis = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
                 vis = cv2.aruco.drawDetectedMarkers(image=vis, corners=corners)
@@ -214,7 +238,7 @@ class Calibration:
                 corners_all.append(charuco_corners)
                 ids_all.append(charuco_ids)
 
-                if visualize:
+                if self.visualize:
                     # draw the Charuco board we've detected to show our
                     # calibrator the board was properly detected
                     vis = cv2.aruco.drawDetectedCornersCharuco(
@@ -253,7 +277,7 @@ class Calibration:
 
         print("Reprojection Error:", rpe)
 
-        if visualize:
+        if self.visualize:
             fig, (ax0, ax1, ax2) = plt.subplots(3, 1)
             ax0.plot(range(1, len(stdDeviationsIntrinsics)+1),
                      [x[0] for x in stdDeviationsIntrinsics],

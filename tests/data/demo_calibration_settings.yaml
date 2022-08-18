@@ -1,0 +1,13 @@
+aruco_dict: DICT_5X5
+cols: 24
+epsilon: 0.00001
+f_mm: 16.0
+marker_size: 0.062
+max_count: 10000
+min_number_of_calibration_images: 20
+min_number_of_corners: 20
+rows: 18
+sensor_height_mm: 7.5
+sensor_width_mm: 10
+square_size: 0.08
+visualize: true
