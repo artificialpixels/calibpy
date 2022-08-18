@@ -3,9 +3,10 @@ from pathlib import Path
 
 
 class Settings:
-
-    def __init__(self):
-        self._location = None
+    """General Settings Handler class. The idea is to have a class
+    that can have arbitrary attributes to be set from a dict or a
+    .yaml file.
+    """
 
     def __contains__(self, key: str) -> bool:
         return key in self.__dict__.keys()
@@ -30,11 +31,17 @@ class Settings:
                 return False
         return True
 
-    @property
-    def location(self):
-        return self._location
-
     def ensure(self, key: str, dtype: type):
+        """Check if a desired attribute actually exist and has the
+        expected type. If not an exception is thrown.
+
+        :param key: attribute name
+        :type key: str
+        :param dtype: attribute type
+        :type dtype: type
+        :raises RuntimeError: Raises an exception if the key
+            does not exist ot the type is wrong
+        """
         if key not in self:
             raise RuntimeError("Missing Settings Entry [{key}] Exception!")
         if not isinstance(self.__dict__[key], dtype):
@@ -42,6 +49,17 @@ class Settings:
                 "Invalid Settings Type: {key} expected to be type {type}!")
 
     def save(self, save_dir: str, filename: str, with_timestamp=False):
+        """Serializes the object and saves all protected attributes to
+        a .yaml file.
+
+        :param save_dir: output directory
+        :type save_dir: str
+        :param filename: output name
+        :type filename: str
+        :param with_timestamp: if True a timestamp is attached,
+            defaults to False
+        :type with_timestamp: bool, optional
+        """
         save_dir = Path(save_dir)
         if not save_dir.is_dir():
             Path.mkdir(save_dir)
@@ -61,27 +79,28 @@ class Settings:
                     data[key] = self.__dict__[key]
             yaml.dump(data, file)
 
-    def from_file(self, filename: str):
-        if isinstance(filename, Path):
-            filename = str(filename)
-        assert (isinstance(filename, str))
-        assert Path(filename).is_file()
+    def from_params(self, params: dict):
+        """set attributes via dictionary. Each dict entry is
+        added as class attribute and can be accessed as such
+        afterwards.
 
-        with open(filename, 'r') as file:
-            data = yaml.safe_load(file)
-        self._location = Path(filename).parent.absolute()
-        if "outdir" in data.keys():
-            if data["outdir"] == ".":
-                data["outdir"] = Path(filename).parent
-        self.from_params(data)
-
-    def from_params(self, params):
+        :param params: dict with attributes to be added
+        :type params: dict
+        """
         for key in params.keys():
             setattr(self, key, params[key])
 
     def from_config(self, config_filename: str):
+        """Set atttributes via .yaml config files. Each entry 
+        is added as class attribute and can be accessed as such
+        afterwards.
+
+        :param config_filename: Config filename, .yaml files expected
+        :type config_filename: str
+        """
+        assert isinstance(config_filename, str) or isinstance(
+            config_filename, Path)
         fname = Path(config_filename)
-        self._location = fname.parent
         assert fname.is_file()
         assert fname.suffix == ".yaml"
         with fname.open() as f:

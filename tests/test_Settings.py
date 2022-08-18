@@ -47,6 +47,13 @@ class TestSettingsModule(unittest.TestCase):
         self.assertFalse(settings1 == settings4)
         self.assertFalse(settings1 == settings5)
 
+    def test_contains(self):
+        settings = Settings()
+        settings.from_params({"a": 1, "b": 2})
+        self.assertTrue("a" in settings)
+        self.assertTrue("b" in settings)
+        self.assertFalse("c" in settings)
+
     def test_serialization(self):
         settings = Settings()
         settings.from_params({
@@ -69,7 +76,7 @@ class TestSettingsModule(unittest.TestCase):
             filename="test_settings")
         self.assertTrue(Path(self._root / "test_settings.yaml").is_file())
         settings2 = Settings()
-        settings2.from_file(str(self._root / "test_settings.yaml"))
+        settings2.from_config(str(self._root / "test_settings.yaml"))
         self.assertTrue(settings == settings2)
         import os
         os.remove(str(self._root / "test_settings.yaml"))
