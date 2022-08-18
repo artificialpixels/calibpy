@@ -1,3 +1,9 @@
+"""
+:Copyrights: Artificial Pixels
+:Author: Sven Wanner (artificial.pixels@gmail.com)
+:Sponsor: SpexAI GmbH
+"""
+
 from calibpy.Calibration import Calibration
 from calibpy.Camera import Camera
 import open3d as o3d

@@ -1,3 +1,9 @@
+"""
+:Copyrights: Artificial Pixels
+:Author: Sven Wanner (artificial.pixels@gmail.com)
+:Sponsor: SpexAI GmbH
+"""
+
 import yaml
 from pathlib import Path
 

@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+"""
+:Copyrights: Artificial Pixels
+:Author: Sven Wanner (artificial.pixels@gmail.com)
+:Sponsor: SpexAI GmbH
+"""
 
 import numpy as np
 try:

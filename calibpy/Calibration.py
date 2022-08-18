@@ -1,4 +1,9 @@
-import sys
+"""
+:Copyrights: Artificial Pixels
+:Author: Sven Wanner (artificial.pixels@gmail.com)
+:Sponsor: SpexAI GmbH
+"""
+
 import cv2
 import numpy as np
 from pathlib import Path
@@ -306,8 +311,8 @@ class Calibration:
             cam.image_size = (image_size[1], image_size[0])
             cam.compute_f_mm()
         if "f_mm" in self._settings:
-            print(f"Focal Length: {self._settings.f_mm} mm")
+            print(f"Focal Length from settings: {self._settings.f_mm} mm")
             print(f"Focal Length estimated: {cam.f_mm} mm")
             print(
-                f"Focal Length Error: {abs(cam.f_mm - self._settings.f_mm)} mm")
+                f"Focal Length Difference: {abs(cam.f_mm - self._settings.f_mm)} mm")
         return cam

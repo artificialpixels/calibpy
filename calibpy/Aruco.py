@@ -1,3 +1,10 @@
+"""
+:Copyrights: Artificial Pixels
+:Author: Sven Wanner (artificial.pixels@gmail.com)
+:Sponsor: SpexAI GmbH
+"""
+
+
 import cv2
 import numpy as np
 

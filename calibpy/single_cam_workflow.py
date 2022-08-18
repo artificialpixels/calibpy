@@ -234,7 +234,7 @@ def single_cam_workflow(
     # To control the processing we need a Seetings object we
     # can initialize via a dictionary or from a .yaml file
     settings = Settings()
-    settings.from_file(calibration_config_file)
+    settings.from_config(calibration_config_file)
 
     # create a Calibration instance and pass the settings object
     calib = Calibration(settings=settings)

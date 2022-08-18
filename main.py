@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+
+"""
+:Author: Sven Wanner (artificial.pixels@gmail.com)
+:Sponsor: SpexAI GmbH
+"""
+
+
 import argparse
 from calibpy.Settings import Settings
 from calibpy.single_cam_workflow import single_cam_workflow, show_pcl_set
