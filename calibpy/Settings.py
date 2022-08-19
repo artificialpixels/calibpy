@@ -14,6 +14,13 @@ class Settings:
     .yaml file.
     """
 
+    def __str__(self):
+        data = self._get_data()
+        txt = "Settings Attributes:\n"
+        for key, val in data.items():
+            txt += f"\t{key}: {val}\n"
+        return txt
+
     def __contains__(self, key: str) -> bool:
         return key in self.__dict__.keys()
 
@@ -37,7 +44,14 @@ class Settings:
                 return False
         return True
 
-    def ensure(self, key: str, dtype: type):
+    def _get_data(self):
+        data = {}
+        for key in self.__dict__.keys():
+            if not key.startswith('__') and not callable(key):
+                data[key] = self.__dict__[key]
+        return data
+
+    def ensure(self, key: str, dtype: type, throw_error: bool = True):
         """Check if a desired attribute actually exist and has the
         expected type. If not an exception is thrown.
 
@@ -49,10 +63,15 @@ class Settings:
             does not exist ot the type is wrong
         """
         if key not in self:
-            raise RuntimeError("Missing Settings Entry [{key}] Exception!")
+            if throw_error:
+                raise RuntimeError("Missing Settings Entry [{key}] Exception!")
+            return False
         if not isinstance(self.__dict__[key], dtype):
-            raise RuntimeError(
-                "Invalid Settings Type: {key} expected to be type {type}!")
+            if throw_error:
+                raise RuntimeError(
+                    "Invalid Settings Type: {key} expected to be type {type}!")
+            return False
+        return True
 
     def save(self, save_dir: str, filename: str, with_timestamp=False):
         """Serializes the object and saves all protected attributes to
@@ -79,10 +98,7 @@ class Settings:
         filename = save_dir / filename
         with filename.open(mode="w") as file:
             import yaml
-            data = {}
-            for key in self.__dict__.keys():
-                if not key.startswith('__') and not callable(key):
-                    data[key] = self.__dict__[key]
+            data = self._get_data()
             yaml.dump(data, file)
 
     def from_params(self, params: dict):
