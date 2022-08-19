@@ -21,7 +21,7 @@ class Camera(Serializer):
     :inherit Serializer: Serializer base class enables serialization
     """
 
-    def __init__(self):
+    def __init__(self, name=None):
         super().__init__()
 
         self._name = None
@@ -32,7 +32,9 @@ class Camera(Serializer):
         self._distortion = None     # (k1, k2, p1, p2, k3)
         self._RT = None             # 4x4 transformation matrix
         self._RTb = None            # 4x4 Blender matrix_world
-        print("Camera initialized!")
+
+        if name is not None:
+            self.name = name
 
     @staticmethod
     def from_cam(cam):
@@ -61,6 +63,7 @@ class Camera(Serializer):
         :param image_size: Image size in px (y, x), defaults to (1080, 1920)
         :type image_size: tuple, optional
         """
+        self._name = "Default Cam"
         self._f_mm = f_mm
         self._sensor_size = sensor_size
         self._image_size = image_size
@@ -90,21 +93,27 @@ class Camera(Serializer):
         :type image_size: tuple, optional
         """
         if f_mm is not None:
-            self._f_mm = f_mm
+            assert f_mm is not None
+            self.f_mm = f_mm
         if sensor_size is not None:
-            self._sensor_size = sensor_size
+            assert sensor_size is not None
+            self.sensor_size = sensor_size
         if image_size is not None:
-            self._image_size = image_size
-        assert isinstance(self._f_mm, float)
-        assert isinstance(self._sensor_size, tuple) and len(
-            self._sensor_size) == 2
-        assert isinstance(self._image_size, tuple) and len(
-            self._image_size) == 2
-        f_x = self._f_mm / self._sensor_size[1] * self._image_size[1]
-        f_y = self._f_mm / self._sensor_size[0] * self._image_size[0]
-        s_x = self._image_size[1] / 2
-        s_y = self._image_size[0] / 2
-        self._intrinsics = np.array([[f_x, 0, s_x], [0, f_y, s_y], [0, 0, 1]])
+            assert image_size is not None
+            self.image_size = image_size
+        assert isinstance(self.f_mm, float)
+        assert isinstance(self.sensor_size, tuple) and len(
+            self.sensor_size) == 2
+        assert isinstance(self.image_size, tuple) and len(
+            self.image_size) == 2
+        f_x = self.f_mm / self.sensor_size[1] * self.image_size[1]
+        f_y = self.f_mm / self.sensor_size[0] * self.image_size[0]
+        s_x = self.image_size[1] / 2
+        s_y = self.image_size[0] / 2
+        self.intrinsics = np.array([[f_x, 0, s_x], [0, f_y, s_y], [0, 0, 1]])
+
+        if self._distortion is None:
+            self.set_distortion(k1=0, k2=0, p1=0, p2=0, k3=0)
 
     @property
     def name(self):
@@ -239,7 +248,7 @@ class Camera(Serializer):
         :param k3:
         :type k3: float
         """
-        self.distortion(np.array([[k1, k2, p1, p2, k3]]))
+        self.distortion = np.array([[k1, k2, p1, p2, k3]])
 
     @property
     def RT(self):
