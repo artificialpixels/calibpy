@@ -7,6 +7,7 @@ import json
 import yaml
 import pickle
 import tempfile
+import numpy as np
 from pathlib import Path
 
 
@@ -123,6 +124,7 @@ class Serializer:
         :type data: dict
         """
         with filename.open(mode="w") as f:
+            data = Serializer._make_txt_dumpable(data)
             yaml.dump(data, f)
             print(f"File {str(filename)} saved")
 
@@ -135,6 +137,7 @@ class Serializer:
         :type data: dict
         """
         with filename.open(mode="w") as f:
+            data = Serializer._make_txt_dumpable(data)
             json.dump(data, f)
             print(f"File {str(filename)} saved")
 
@@ -158,7 +161,7 @@ class Serializer:
         """
         with filename.open(mode="rb") as f:
             data = yaml.safe_load(f)
-        self.from_dict(data)
+        self.from_dict(Serializer.convert_from_dumped(data))
 
     def _load_json(self, filename: Path):
         """Loads a .json file and creates a class attribute
@@ -169,4 +172,27 @@ class Serializer:
         """
         with filename.open(mode="rb") as f:
             data = json.load(f)
-        self.from_dict(data)
+        self.from_dict(Serializer.convert_from_dumped(data))
+
+    @staticmethod
+    def _make_txt_dumpable(data: dict):
+        out = {}
+        for key, val in data.items():
+            out_val_props = {}
+            if type(val) == np.ndarray:
+                out_val_props["value"] = val.tolist()
+            else:
+                out_val_props["value"] = val
+            out_val_props["type"] = str(type(val))
+            out[key] = out_val_props
+        return out
+
+    @staticmethod
+    def convert_from_dumped(data: dict):
+        data = {}
+        for key, val in data.items():
+            if val["type"] == str(type(np.array())):
+                data[key] = np.array(val["value"])
+            else:
+                data[key] = val["value"]
+        return data
