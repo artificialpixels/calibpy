@@ -36,6 +36,16 @@ class Camera(Serializer):
         if name is not None:
             self.name = name
 
+    def __str__(self):
+        string = ""
+        string = f"{self.__class__.__name__}:\n"
+        string += "-----------------------------------\n"
+        data = self.serialize()
+        for key, value in data.items():
+            string += f" - {key} | {type(value)}:\n"
+            string += f"\t{value}\n"
+        return string
+
     @staticmethod
     def from_cam(cam):
         """Copy Camera object
