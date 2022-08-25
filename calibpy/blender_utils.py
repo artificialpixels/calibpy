@@ -12,12 +12,10 @@ from glob import glob
 from pathlib import Path
 from mathutils import Matrix
 
-CAMERAS_DIR = "D:\\Tmp\\scw_test"
-
 
 def read_npys_from_dir(dirname: str) -> list:
     filenames = []
-    for f in glob(CAMERAS_DIR + os.sep + "*.npy"):
+    for f in glob(dirname + os.sep + "*.npy"):
         filenames.append(f)
     filenames.sort()
     return filenames
@@ -56,8 +54,8 @@ def matrix_from_numpy(array: np.ndarray) -> Matrix:
 
 def create_camera(context: object, props: dict):
     cam_name = "CalibpyCam"
-    if props["_name"] is not None and props["_name"] != "":
-        cam_name = props["_name"]
+    if props["name"] is not None and props["name"] != "":
+        cam_name = props["name"]
     if cam_name in bpy.data.objects.keys():
         delete_object(context, bpy.data.objects[cam_name])
 
@@ -70,14 +68,29 @@ def create_camera(context: object, props: dict):
 
     cam = find_latest_object_by_name(context, "Camera")
     cam.name = cam_name
-    cam.data.sensor_height = props['_sensor_size'][0]
-    cam.data.sensor_width = props['_sensor_size'][1]
+    if 'sensor_size' in props and props['sensor_size'] is not None:
+        cam.data.sensor_height = props['sensor_size'][0]
+        cam.data.sensor_width = props['sensor_size'][1]
     cam.data.lens_unit = 'MILLIMETERS'
-    cam.data.lens = props['_f_mm']
-    cam.matrix_world = matrix_from_numpy(props['_RTb'])
+    if 'f_mm' in props and props["f_mm"] is not None:
+        cam.data.lens = props['f_mm']
+    cam.matrix_world = matrix_from_numpy(props['RTb'])
 
 
 if __name__ == "__main__":
-    filename = str(Path(CAMERAS_DIR) / "extrinsics_000000.npy")
+    ROOT_DIR = "D:\\SpexAI\\phase_2\\data\\calibpy_calibration"
+    filename = str(Path(ROOT_DIR) / "904412062098_extrinsics.npy")
+    props = load_camera_props_from_file(filename)
+    create_camera(bpy.context, props)
+
+    filename = str(Path(ROOT_DIR) / "904412062099_extrinsics.npy")
+    props = load_camera_props_from_file(filename)
+    create_camera(bpy.context, props)
+
+    filename = str(Path(ROOT_DIR) / "912322060060_extrinsics.npy")
+    props = load_camera_props_from_file(filename)
+    create_camera(bpy.context, props)
+
+    filename = str(Path(ROOT_DIR) / "912322060468_extrinsics.npy")
     props = load_camera_props_from_file(filename)
     create_camera(bpy.context, props)

@@ -85,7 +85,8 @@ def extrinsic_calibration_image(
     cams = calib.calibrate_extrinsics(fs, intrinsics)
 
     # save cam if out_dir wasn't None
-    fname = get_savename_pattern(save_dir=out_dir, name="extrinsics")
+    fname = get_savename_pattern(
+        save_dir=out_dir, name=f"{intrinsics.name}_extrinsics")
     if fname is not None:
         cams[0].serialize(fname)
     return cams[0]

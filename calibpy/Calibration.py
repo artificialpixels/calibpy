@@ -179,7 +179,7 @@ class Calibration:
                     Calibration.show_image(
                         vis,
                         text=f"{name}",
-                        proportion=1000)
+                        proportion=1280)
 
             p3d = []
             for id in charuco_ids:
@@ -271,7 +271,7 @@ class Calibration:
                     Calibration.show_image(
                         vis,
                         text=f"Frame: {str(frame).zfill(5)}",
-                        proportion=800,
+                        proportion=1280,
                         duration=1)
 
             frame += 1
