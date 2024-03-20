@@ -231,7 +231,7 @@ class Calibration:
         if stream.length < min_N:
             print(
                 f"Cannot apply internal calibration on \
-                    less than {min_N} images!")
+                    {stream.length}, less than {min_N} images!")
             raise RuntimeError("Internal Calibration Failed!")
         while True:
             # get next image
@@ -277,7 +277,7 @@ class Calibration:
             frame += 1
 
         if accepted_images < min_N:
-            print("Calibration Failed! Found less than {min_N} images")
+            print(f"Calibration Failed! Found {accepted_images}, less than {min_N} images")
             raise RuntimeError("Internal Calibration Failed")
         else:
             print(f"{accepted_images} valid captures")
@@ -333,5 +333,5 @@ class Calibration:
             print(f"Focal Length estimated: {cam.f_mm} mm")
             print(
                 "Focal Length Difference:",
-                "f{abs(cam.f_mm - self._settings.f_mm)} mm")
+                "{} mm".format(abs(cam.f_mm - self._settings.f_mm)))
         return cam

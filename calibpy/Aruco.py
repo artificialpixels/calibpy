@@ -182,11 +182,11 @@ def get_aruco_corners(img: np.ndarray,
             3, 3), zeroZone=(-1, -1), criteria=criteria)
 
     # get charuco corners and ids from detected aruco markers
-    response, charuco_corners, charuco_ids = \
+    num_corners, charuco_corners, charuco_ids = \
         cv2.aruco.interpolateCornersCharuco(
             markerCorners=corners,
             markerIds=ids,
             image=img,
             board=aruco_target.board)
 
-    return response, charuco_corners, charuco_ids, corners
+    return num_corners, charuco_corners, charuco_ids, corners
