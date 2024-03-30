@@ -6,7 +6,7 @@
 
 import cv2
 import numpy as np
-
+from packaging import version
 
 def get_aruco_dict(dict_key: str) -> int:
     """returns the opencv aruco dict identifier from settings string
@@ -17,17 +17,33 @@ def get_aruco_dict(dict_key: str) -> int:
     :return: aruco dict identifier
     :rtype: int
     """
-    if dict_key == "DICT_4X4":
-        return cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
-    elif dict_key == "DICT_5X5":
-        return cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_250)
-    elif dict_key == "DICT_6X6":
-        return cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_1000)
-    elif dict_key == "DICT_7X7":
-        return cv2.aruco.Dictionary_get(cv2.aruco.DICT_7X7_1000)
+    opencv_version = version.parse(cv2.__version__)
+    version_4_7 = version.parse("4.7.0")
+    if opencv_version < version_4_7:
+        if dict_key == "DICT_4X4":
+            return cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
+        elif dict_key == "DICT_5X5":
+            return cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_250)
+        elif dict_key == "DICT_6X6":
+            return cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_1000)
+        elif dict_key == "DICT_7X7":
+            return cv2.aruco.Dictionary_get(cv2.aruco.DICT_7X7_1000)
+        else:
+            raise IOError(
+                f"Unknown ARUCO_DICT {dict_key}, \
+                supported are [DICT_4X4, DICT_5X5, DICT_6X6, DICT_7X7]")
     else:
-        raise IOError(
-            f"Unknown ARUCO_DICT {dict_key}, \
+        if dict_key == "DICT_4X4":
+            return cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+        elif dict_key == "DICT_5X5":
+            return cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_250)
+        elif dict_key == "DICT_6X6":
+            return cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_1000)
+        elif dict_key == "DICT_7X7":
+            return cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_7X7_1000)
+        else:
+            raise IOError(
+                f"Unknown ARUCO_DICT {dict_key}, \
                 supported are [DICT_4X4, DICT_5X5, DICT_6X6, DICT_7X7]")
 
 
@@ -53,12 +69,21 @@ def create_aruco_board(
     :return: target board descriptors
     :rtype: cv2.aruco.CharucoBoard instance, points_3d, ids
     """
-    board = cv2.aruco.CharucoBoard_create(
-        squaresX=cols,
-        squaresY=rows,
-        squareLength=square_size,
-        markerLength=marker_size,
-        dictionary=get_aruco_dict(dict_key))
+    opencv_version = version.parse(cv2.__version__)
+    version_4_7 = version.parse("4.7.0")
+    if opencv_version < version_4_7:
+        board = cv2.aruco.CharucoBoard_create(
+            squaresX=cols,
+            squaresY=rows,
+            squareLength=square_size,
+            markerLength=marker_size,
+            dictionary=get_aruco_dict(dict_key))
+    else:
+        board = cv2.aruco.CharucoBoard(
+            (cols, rows),
+            squareLength=square_size,
+            markerLength=marker_size,
+            dictionary=get_aruco_dict(dict_key))
 
     N = (cols-1) * (rows-1)
     objp = np.zeros((N, 3), np.float32)
@@ -157,11 +182,11 @@ def get_aruco_corners(img: np.ndarray,
             3, 3), zeroZone=(-1, -1), criteria=criteria)
 
     # get charuco corners and ids from detected aruco markers
-    response, charuco_corners, charuco_ids = \
+    num_corners, charuco_corners, charuco_ids = \
         cv2.aruco.interpolateCornersCharuco(
             markerCorners=corners,
             markerIds=ids,
             image=img,
             board=aruco_target.board)
 
-    return response, charuco_corners, charuco_ids, corners
+    return num_corners, charuco_corners, charuco_ids, corners
