@@ -6,7 +6,7 @@ matplotlib
 numpy
 scipy
 open3d
-opencv-contrib-python
+opencv-contrib-python==4.7.0.72
 OpenEXR
 pytest
 PyYAML
