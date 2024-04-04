@@ -14,7 +14,7 @@ from calibpy.single_cam_workflow import single_cam_workflow, show_pcl_set
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input',
                     type=str,
-                    default="tests\\data\\demo_project_settings.yaml",
+                    default="tests/data/demo_project_settings.yaml",
                     help="Project settings file")
 parser.add_argument('-w', '--workflow',
                     type=str,

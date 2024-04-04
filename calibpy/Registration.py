@@ -113,8 +113,8 @@ def register_depthmap_to_world(
             rgbd,
             o3d_cam,
             camera.RT)
-
-    pcd = pcd.random_down_sample(downsample_factor)
+    if downsample_factor != 1.0:
+        pcd = pcd.random_down_sample(downsample_factor)
     return pcd
 
 

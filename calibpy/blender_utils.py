@@ -78,7 +78,7 @@ def create_camera(context: object, props: dict):
 
 
 if __name__ == "__main__":
-    ROOT_DIR = "D:\\SpexAI\\phase_2\\data\\calibpy_calibration"
+    ROOT_DIR = "tests/data/calibration"
     filename = str(Path(ROOT_DIR) / "904412062098_extrinsics.npy")
     props = load_camera_props_from_file(filename)
     create_camera(bpy.context, props)
