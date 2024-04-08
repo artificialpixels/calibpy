@@ -2,6 +2,9 @@
 :Copyrights: Artificial Pixels
 :Author: Sven Wanner (artificial.pixels@gmail.com)
 :Sponsor: SpexAI GmbH
+
+This is to be loaded into a running blender application, to import
+the cameras into the pointclouds. See `single_cam.blend`
 """
 
 import os
@@ -78,19 +81,19 @@ def create_camera(context: object, props: dict):
 
 
 if __name__ == "__main__":
-    ROOT_DIR = "tests/data/calibration"
-    filename = str(Path(ROOT_DIR) / "904412062098_extrinsics.npy")
+    ROOT_DIR = "." # see calibpy/tests/data/calibration/
+    filename = str(Path(ROOT_DIR) / "extrinsics_0001.npy")
     props = load_camera_props_from_file(filename)
     create_camera(bpy.context, props)
 
-    filename = str(Path(ROOT_DIR) / "904412062099_extrinsics.npy")
+    filename = str(Path(ROOT_DIR) / "extrinsics_0002.npy")
     props = load_camera_props_from_file(filename)
     create_camera(bpy.context, props)
 
-    filename = str(Path(ROOT_DIR) / "912322060060_extrinsics.npy")
+    filename = str(Path(ROOT_DIR) / "extrinsics_0003.npy")
     props = load_camera_props_from_file(filename)
     create_camera(bpy.context, props)
 
-    filename = str(Path(ROOT_DIR) / "912322060468_extrinsics.npy")
+    filename = str(Path(ROOT_DIR) / "extrinsics_0004.npy")
     props = load_camera_props_from_file(filename)
     create_camera(bpy.context, props)
