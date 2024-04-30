@@ -195,7 +195,7 @@ def register_stream(
     pcds = []
     for i in range(4):
         # register the depth and color images as pointclouds to
-        # the global coordinate system of the extrnal calibration
+        # the global coordinate system of the external calibration
         pcd = register_depthmap_to_world(
             extrinsics[i],
             fs_depths.get(i),
@@ -222,7 +222,7 @@ def single_cam_workflow(
         intrinsic_calibration_input_dir: str,
         calibration_config_file: str,
         extrinsic_calibration_input: str = None,
-        depth_registration_input: str = None,
+        depth_registration_input: str = None, # file or dir
         color_registration_input: str = None,
         blender_conform: bool = True,
         register_from_frame: int = 0,
@@ -238,7 +238,7 @@ def single_cam_workflow(
     out_root = Path(project_dir) / project_name
     out_root.mkdir(parents=True, exist_ok=True)
 
-    # To control the processing we need a Seetings object we
+    # To control the processing we need a Settings object we
     # can initialize via a dictionary or from a .yaml file
     settings = Settings()
     settings.from_config(calibration_config_file)

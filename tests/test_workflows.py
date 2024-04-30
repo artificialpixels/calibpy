@@ -1,12 +1,13 @@
 import yaml
 import unittest
 import numpy as np
+import sys
 from glob import glob
 from pathlib import Path
 from calibpy.Settings import Settings
 from calibpy.Stream import FileStream
 from calibpy.Calibration import Calibration
-from calibpy.Registration import register_depthmap_to_world
+from calibpy.Registration import register_depthmap_to_world, show_registration
 import cv2
 from packaging import version
 
@@ -25,13 +26,15 @@ class TestCameraModule(unittest.TestCase):
             with open(fname, "r") as file:
                 self._cam_gts.append(yaml.safe_load(file))
         self._test_data_filenames = []
+        # TODO fix changed APIs
         self._has_broken_cv2 = version.parse(cv2.__version__) >= version.parse("4.8.0")
 
     def tearDown(self):
-        import os
+        #import os
         for fname in self._test_data_filenames:
             if Path(fname).exists():
-                os.remove(fname)
+                print(f"created {fname}")
+        #        os.remove(fname)
 
     def test_intrisics(self):
         stream = FileStream()
@@ -98,7 +101,7 @@ class TestCameraModule(unittest.TestCase):
             "sensor_height_mm": 7.5,
             "f_mm": 16.0,
             "visualize": False,
-            "outdir": self._root
+            "outdir": self._root / "calibration"
         })
 
         calib = Calibration(settings=settings)
@@ -106,19 +109,24 @@ class TestCameraModule(unittest.TestCase):
             print(f"Warning! opencv_version {cv2.__version__} is broken since 4.8, skipped\n")
             self.skipTest("broken opencv")
         cam = calib.calibrate_intrinsics(stream)
-        cam.serialize(Path(settings.outdir) / "intrinsics.npy")
-        self._test_data_filenames.append(
-            str(Path(settings.outdir) / "intrinsics.npy"))
+        path = settings.outdir / "intrinsics.npy"
+        if not settings.outdir.exists():
+            settings.outdir.mkdir()
+        cam.serialize(path)
+        self._test_data_filenames.append(str(path))
 
         stream = FileStream()
         directory = self._root / "single_cam" / "undistorted"
         stream.initialize(directory=directory)
 
         cams = calib.calibrate_extrinsics(stream, cam)
+        i = 1
         for cam in cams:
-            cam.serialize(Path(settings.outdir) / f"{cam.name}.npy")
-            self._test_data_filenames.append(
-                str(Path(settings.outdir) / f"{cam.name}.npy"))
+            name = cam.name if cam.name else i
+            i = i + 1
+            path = Path(settings.outdir) / f"extrinsics_{name}.npy"
+            cam.serialize(path)
+            self._test_data_filenames.append(str(path))
         self.assertEqual(len(self._cam_gts), len(cams))
         for n, cam in enumerate(cams):
             gt = self._cam_gts[n]
@@ -177,14 +185,13 @@ class TestCameraModule(unittest.TestCase):
         depth_stream.initialize(directory=directory)
 
         stream.reset()
-        pcds = []
+        pcds = [] # pointcloudsregister, blender conform
         merged = None
         for i in range(4):
             pcd = register_depthmap_to_world(
                 cams[i],
                 depth_stream.get(i),
-                stream.get(i),
-                0.1)
+                stream.get(i))
             if merged is None:
                 merged = pcd
             else:
@@ -197,6 +204,10 @@ class TestCameraModule(unittest.TestCase):
         self.assertTrue((maxb[0]-minb[0])-2.7045092166984497 < 0.1)
         self.assertTrue((maxb[1]-minb[1])-2.466959368288604 < 0.1)
         self.assertTrue((maxb[2]-minb[2])-0.4866462015080666 < 0.1)
+        # TODO save pcds as single_cam.blend
+        
+        if sys.stdin.isatty():
+            show_registration(pcds) # to display the constructed 3d img
 
 
 if __name__ == '__main__':
